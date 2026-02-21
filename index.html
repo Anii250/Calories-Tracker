@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description"
+    content="CalorieAI — Track your daily calories, macros, and meals with a beautiful food diary." />
+  <meta name="theme-color" content="#43a047" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CalorieAI" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>CalorieAI — Calories Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/index.css" />
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <!-- Store (data layer) -->
+  <script src="src/store.js"></script>
+
+  <!-- Components -->
+  <script src="src/components/ProgressRing.js"></script>
+  <script src="src/components/MacroBar.js"></script>
+  <script src="src/components/MealCard.js"></script>
+  <script src="src/components/NavBar.js"></script>
+  <script src="src/components/NumberPicker.js"></script>
+  <script src="src/components/AchievementModal.js"></script>
+
+  <!-- Pages -->
+  <script src="src/pages/FoodDiary.js"></script>
+  <script src="src/pages/Settings.js"></script>
+  <script src="src/pages/Scanner.js"></script>
+
+  <!-- Router / main -->
+  <script src="src/main.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>
