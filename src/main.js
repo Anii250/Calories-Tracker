@@ -2,7 +2,6 @@
    CalorieAI — Hash Router & App Init
    ============================================================ */
 
-// Splash Screen Quotes
 const SPLASH_QUOTES = [
     '"Take care of your body. It\'s the only place you have to live." — Jim Rohn',
     '"The food you eat can be either the safest medicine or the slowest poison."',
@@ -20,24 +19,18 @@ function initSplash() {
     const splash = document.getElementById('splash');
     const quoteEl = document.getElementById('splash-quote');
     if (!splash) return;
-
-    // Set random quote
     if (quoteEl) {
-        const q = SPLASH_QUOTES[Math.floor(Math.random() * SPLASH_QUOTES.length)];
-        quoteEl.textContent = q;
+        quoteEl.textContent = SPLASH_QUOTES[Math.floor(Math.random() * SPLASH_QUOTES.length)];
     }
-
-    // Dismiss after 2.5 seconds
     setTimeout(() => {
         splash.classList.add('fade-out');
-        setTimeout(() => {
-            splash.remove();
-        }, 600);
+        setTimeout(() => splash.remove(), 600);
     }, 2500);
 }
 
 const Router = (() => {
     const routes = {
+        login: AuthPage,
         diary: FoodDiaryPage,
         charts: ChartsPage,
         scanner: ScannerPage,
@@ -53,7 +46,19 @@ const Router = (() => {
     function render() {
         const route = getRoute();
 
-        // Check onboarding on first load
+        // Auth guard — redirect to login if not signed in
+        if (!Auth.isLoggedIn() && route !== 'login') {
+            location.hash = '#/login';
+            return;
+        }
+
+        // If logged in but on login page, go to diary
+        if (Auth.isLoggedIn() && route === 'login') {
+            location.hash = '#/diary';
+            return;
+        }
+
+        // Onboarding check
         if (route === 'diary' && !Store.hasOnboarded()) {
             location.hash = '#/onboarding';
             return;
@@ -65,7 +70,6 @@ const Router = (() => {
             app.innerHTML = pageFn();
         }
 
-        // Render chart if on charts page
         if (route === 'charts') {
             setTimeout(() => renderChart(), 50);
         }
@@ -78,7 +82,18 @@ const Router = (() => {
     window.addEventListener('hashchange', render);
     window.addEventListener('DOMContentLoaded', () => {
         initSplash();
-        render();
+
+        // Listen for Firebase auth state
+        Auth.onAuthChanged(async (user) => {
+            if (user) {
+                // Sync from cloud on login
+                const cloudData = await CloudSync.loadFromCloud();
+                if (cloudData) {
+                    Store.mergeCloudData(cloudData);
+                }
+            }
+            render();
+        });
     });
 
     return { navigate, render };

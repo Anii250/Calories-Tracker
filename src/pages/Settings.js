@@ -8,6 +8,10 @@ function onWeightChange(val) { Store.updateProfile({ weight: val }); }
 function SettingsPage() {
   const state = Store.getState();
   const p = state.profile;
+  const user = Auth.getCurrentUser();
+  const userName = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const userEmail = user?.email || '';
+  const userPhoto = user?.photoURL || '';
 
   return `
     <div class="page" id="settings-page">
@@ -17,6 +21,18 @@ function SettingsPage() {
         </button>
         <div class="page-header__title">Settings</div>
         <div style="width:36px;"></div>
+      </div>
+
+      <!-- User Profile Card -->
+      <div class="user-profile-card">
+        <div class="user-profile-card__avatar">
+          ${userPhoto ? `<img src="${userPhoto}" alt="" />` : `<span>${userName.charAt(0).toUpperCase()}</span>`}
+        </div>
+        <div class="user-profile-card__info">
+          <div class="user-profile-card__name">${userName}</div>
+          <div class="user-profile-card__email">${userEmail}</div>
+        </div>
+        <span class="user-profile-card__badge">☁️ Synced</span>
       </div>
 
       <!-- Dark Mode -->
@@ -96,6 +112,15 @@ function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <!-- Logout -->
+      <div class="settings-section" style="margin-top:16px;">
+        <button class="btn auth-logout-btn" onclick="Auth.logout()" style="width:100%;">
+          🚪 Sign Out
+        </button>
+      </div>
+
+      <div style="height:20px;"></div>
     </div>
     ${NavBar('settings')}
   `;

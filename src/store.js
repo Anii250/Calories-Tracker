@@ -429,6 +429,32 @@ const Store = (() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }
 
+  // Cloud sync helpers
+  function mergeCloudData(cloudData) {
+    if (!cloudData) return;
+    const data = load();
+    if (cloudData.profile) data.profile = { ...data.profile, ...cloudData.profile };
+    if (cloudData.dailyGoal) data.dailyGoal = cloudData.dailyGoal;
+    if (cloudData.waterTarget) data.waterTarget = cloudData.waterTarget;
+    if (cloudData.reminders) data.reminders = cloudData.reminders;
+    if (typeof cloudData.hasOnboarded !== 'undefined') data.hasOnboarded = cloudData.hasOnboarded;
+    save(data);
+  }
+
+  function syncToCloud() {
+    if (typeof CloudSync !== 'undefined') {
+      const data = load();
+      CloudSync.saveToCloud(data);
+    }
+  }
+
+  // Override save to also sync to cloud
+  const origUpdateProfile = updateProfile;
+  updateProfile = function (updates) {
+    origUpdateProfile(updates);
+    syncToCloud();
+  };
+
   initTheme();
 
   return {
@@ -440,6 +466,8 @@ const Store = (() => {
     getReminders, updateReminders,
     hasOnboarded, completeOnboarding,
     exportCSV, searchFood, getFoodDatabase,
-    getDarkMode, setDarkMode, initTheme
+    getDarkMode, setDarkMode, initTheme,
+    mergeCloudData, syncToCloud
   };
 })();
+
