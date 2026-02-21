@@ -5,8 +5,10 @@
 const Router = (() => {
     const routes = {
         diary: FoodDiaryPage,
+        charts: ChartsPage,
         scanner: ScannerPage,
-        settings: SettingsPage
+        settings: SettingsPage,
+        onboarding: OnboardingPage
     };
 
     function getRoute() {
@@ -16,10 +18,22 @@ const Router = (() => {
 
     function render() {
         const route = getRoute();
+
+        // Check onboarding on first load
+        if (route === 'diary' && !Store.hasOnboarded()) {
+            location.hash = '#/onboarding';
+            return;
+        }
+
         const pageFn = routes[route] || routes.diary;
         const app = document.getElementById('app');
         if (app) {
             app.innerHTML = pageFn();
+        }
+
+        // Render chart if on charts page
+        if (route === 'charts') {
+            setTimeout(() => renderChart(), 50);
         }
     }
 
@@ -27,13 +41,8 @@ const Router = (() => {
         location.hash = '#/' + route;
     }
 
-    // Listen for hash changes
     window.addEventListener('hashchange', render);
-
-    // Initial render
-    window.addEventListener('DOMContentLoaded', () => {
-        render();
-    });
+    window.addEventListener('DOMContentLoaded', () => { render(); });
 
     return { navigate, render };
 })();

@@ -3,13 +3,13 @@
    ============================================================ */
 
 function FoodDiaryPage() {
-    const totals = Store.getTotals();
-    const dailyGoal = Store.getDailyGoal();
-    const meals = Store.getTodayMeals();
-    const eaten = totals.cal;
-    const dateStr = Store.getFormattedToday();
+  const totals = Store.getTotals();
+  const dailyGoal = Store.getDailyGoal();
+  const meals = Store.getTodayMeals();
+  const eaten = totals.cal;
+  const dateStr = Store.getFormattedToday();
 
-    return `
+  return `
     <div class="page" id="food-diary-page">
       <!-- Header -->
       <div class="page-header">
@@ -17,9 +17,12 @@ function FoodDiaryPage() {
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="page-header__title">Food Diary</div>
-        <button class="page-header__icon" onclick="showAchievementModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${StreakCounter()}
+          <button class="page-header__icon" onclick="showAchievementModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+        </div>
       </div>
 
       <!-- Tip Card -->
@@ -48,6 +51,11 @@ function FoodDiaryPage() {
       <!-- Macro Bar -->
       ${MacroBar(totals.cal, totals.proteins, totals.fats, totals.carbs)}
 
+      <!-- Water Tracker -->
+      <div id="water-section" style="margin-top:12px;">
+        ${WaterTracker()}
+      </div>
+
       <!-- Eaten section -->
       <div class="section-title">Eaten:</div>
       <div id="meals-list">
@@ -67,15 +75,21 @@ function FoodDiaryPage() {
   `;
 }
 
-/* Add Food Modal */
+/* Add Food Modal — now with Food Search */
 function openAddFoodModal() {
-    const existing = document.getElementById('add-food-overlay');
-    if (existing) existing.remove();
+  const existing = document.getElementById('add-food-overlay');
+  if (existing) existing.remove();
 
-    const html = `
+  const html = `
     <div class="add-food-overlay" id="add-food-overlay" onclick="closeAddFoodModal(event)">
       <div class="add-food-sheet" onclick="event.stopPropagation()">
         <h3>Add Food</h3>
+
+        <!-- Food Search -->
+        ${FoodSearch()}
+
+        <div style="text-align:center;color:var(--text-muted);font-size:.78rem;margin:12px 0;">— or enter manually —</div>
+
         <div class="form-group">
           <label for="food-name">Food Name</label>
           <input type="text" id="food-name" placeholder="e.g. Grilled Chicken" />
@@ -116,43 +130,33 @@ function openAddFoodModal() {
       </div>
     </div>
   `;
-    document.body.insertAdjacentHTML('beforeend', html);
-
-    // Focus name field
-    setTimeout(() => document.getElementById('food-name')?.focus(), 100);
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(() => document.getElementById('food-search-input')?.focus(), 100);
 }
 
 function closeAddFoodModal(e) {
-    if (e) e.stopPropagation();
-    const modal = document.getElementById('add-food-overlay');
-    if (modal) {
-        modal.style.animation = 'fadeIn .2s ease reverse';
-        setTimeout(() => modal.remove(), 200);
-    }
+  if (e) e.stopPropagation();
+  const modal = document.getElementById('add-food-overlay');
+  if (modal) {
+    modal.style.animation = 'fadeIn .2s ease reverse';
+    setTimeout(() => modal.remove(), 200);
+  }
 }
 
 function submitAddFood() {
-    const name = document.getElementById('food-name')?.value?.trim();
-    const mealType = document.getElementById('meal-type')?.value;
-    const cal = parseFloat(document.getElementById('food-cal')?.value) || 0;
-    const protein = parseFloat(document.getElementById('food-protein')?.value) || 0;
-    const fats = parseFloat(document.getElementById('food-fats')?.value) || 0;
-    const carbs = parseFloat(document.getElementById('food-carbs')?.value) || 0;
+  const name = document.getElementById('food-name')?.value?.trim();
+  const mealType = document.getElementById('meal-type')?.value;
+  const cal = parseFloat(document.getElementById('food-cal')?.value) || 0;
+  const protein = parseFloat(document.getElementById('food-protein')?.value) || 0;
+  const fats = parseFloat(document.getElementById('food-fats')?.value) || 0;
+  const carbs = parseFloat(document.getElementById('food-carbs')?.value) || 0;
 
-    if (!name) {
-        document.getElementById('food-name').style.borderColor = 'red';
-        return;
-    }
+  if (!name) {
+    document.getElementById('food-name').style.borderColor = 'red';
+    return;
+  }
 
-    Store.addMeal(mealType, {
-        name,
-        calories: cal,
-        proteins: protein,
-        fats: fats,
-        carbs: carbs,
-        qty: 1
-    });
-
-    closeAddFoodModal();
-    Router.navigate('diary');
+  Store.addMeal(mealType, { name, calories: cal, proteins: protein, fats, carbs, qty: 1 });
+  closeAddFoodModal();
+  Router.navigate('diary');
 }

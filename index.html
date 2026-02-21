@@ -22,7 +22,7 @@
 <body>
   <div id="app"></div>
 
-  <!-- Store (data layer) -->
+  <!-- Store -->
   <script src="src/store.js"></script>
 
   <!-- Components -->
@@ -32,16 +32,24 @@
   <script src="src/components/NavBar.js"></script>
   <script src="src/components/NumberPicker.js"></script>
   <script src="src/components/AchievementModal.js"></script>
+  <script src="src/components/WaterTracker.js"></script>
+  <script src="src/components/StreakCounter.js"></script>
+  <script src="src/components/FoodSearch.js"></script>
+  <script src="src/components/CameraCapture.js"></script>
+  <script src="src/components/MealReminders.js"></script>
+  <script src="src/components/ExportData.js"></script>
 
   <!-- Pages -->
   <script src="src/pages/FoodDiary.js"></script>
-  <script src="src/pages/Settings.js"></script>
+  <script src="src/pages/Charts.js"></script>
   <script src="src/pages/Scanner.js"></script>
+  <script src="src/pages/Settings.js"></script>
+  <script src="src/pages/Onboarding.js"></script>
 
-  <!-- Router / main -->
+  <!-- Router -->
   <script src="src/main.js"></script>
 
-  <!-- Service Worker Registration -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

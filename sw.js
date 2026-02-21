@@ -2,7 +2,7 @@
    CalorieAI — Service Worker (offline caching)
    ============================================================ */
 
-const CACHE_NAME = 'calorieai-v1';
+const CACHE_NAME = 'calorieai-v2';
 
 const PRECACHE_URLS = [
     './',
@@ -17,12 +17,19 @@ const PRECACHE_URLS = [
     './src/components/NavBar.js',
     './src/components/NumberPicker.js',
     './src/components/AchievementModal.js',
+    './src/components/WaterTracker.js',
+    './src/components/StreakCounter.js',
+    './src/components/FoodSearch.js',
+    './src/components/CameraCapture.js',
+    './src/components/MealReminders.js',
+    './src/components/ExportData.js',
     './src/pages/FoodDiary.js',
+    './src/pages/Charts.js',
+    './src/pages/Scanner.js',
     './src/pages/Settings.js',
-    './src/pages/Scanner.js'
+    './src/pages/Onboarding.js'
 ];
 
-// Install — pre-cache all app files
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -31,7 +38,6 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate — clean old caches
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then(keys =>
@@ -42,15 +48,12 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch — serve from cache, fall back to network
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
             .then(cached => {
                 if (cached) return cached;
-
                 return fetch(event.request).then(response => {
-                    // Cache successful GET responses
                     if (response.ok && event.request.method === 'GET') {
                         const clone = response.clone();
                         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
@@ -59,7 +62,6 @@ self.addEventListener('fetch', (event) => {
                 });
             })
             .catch(() => {
-                // Offline fallback for navigation
                 if (event.request.mode === 'navigate') {
                     return caches.match('./index.html');
                 }

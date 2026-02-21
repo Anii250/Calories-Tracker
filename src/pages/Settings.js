@@ -2,14 +2,8 @@
    Settings Page — Profile & preferences
    ============================================================ */
 
-// Callbacks for number pickers
-function onHeightChange(val) {
-  Store.updateProfile({ height: val });
-}
-
-function onWeightChange(val) {
-  Store.updateProfile({ weight: val });
-}
+function onHeightChange(val) { Store.updateProfile({ height: val }); }
+function onWeightChange(val) { Store.updateProfile({ weight: val }); }
 
 function SettingsPage() {
   const state = Store.getState();
@@ -17,7 +11,6 @@ function SettingsPage() {
 
   return `
     <div class="page" id="settings-page">
-      <!-- Header -->
       <div class="page-header">
         <button class="page-header__icon" onclick="Router.navigate('diary')">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -71,71 +64,48 @@ function SettingsPage() {
         </div>
       </div>
 
+      <!-- Meal Reminders -->
+      ${MealReminders()}
+
+      <!-- Export -->
+      ${ExportData()}
+
       <!-- Activity -->
       <div class="settings-section">
         <div class="settings-section__title">Type of physical activity</div>
         <div class="activity-cards">
           <div class="activity-card ${p.activity === 'sedentary' ? 'active' : ''}" onclick="setActivity('sedentary')">
             <div class="activity-card__icon">🪑</div>
-            <div class="activity-card__text">
-              <div class="activity-card__title">Sedentary</div>
-              <div class="activity-card__desc">Little to no exercise</div>
-            </div>
+            <div class="activity-card__text"><div class="activity-card__title">Sedentary</div><div class="activity-card__desc">Little to no exercise</div></div>
           </div>
           <div class="activity-card ${p.activity === 'light' ? 'active' : ''}" onclick="setActivity('light')">
             <div class="activity-card__icon">🚶</div>
-            <div class="activity-card__text">
-              <div class="activity-card__title">Light</div>
-              <div class="activity-card__desc">Exercise 1-3 days/week</div>
-            </div>
+            <div class="activity-card__text"><div class="activity-card__title">Light</div><div class="activity-card__desc">Exercise 1-3 days/week</div></div>
           </div>
           <div class="activity-card ${p.activity === 'moderate' ? 'active' : ''}" onclick="setActivity('moderate')">
             <div class="activity-card__icon">🏃</div>
-            <div class="activity-card__text">
-              <div class="activity-card__title">Moderate</div>
-              <div class="activity-card__desc">Exercise 3-5 days/week</div>
-            </div>
+            <div class="activity-card__text"><div class="activity-card__title">Moderate</div><div class="activity-card__desc">Exercise 3-5 days/week</div></div>
           </div>
           <div class="activity-card ${p.activity === 'active' ? 'active' : ''}" onclick="setActivity('active')">
             <div class="activity-card__icon">🏋️</div>
-            <div class="activity-card__text">
-              <div class="activity-card__title">Active</div>
-              <div class="activity-card__desc">Exercise 6-7 days/week</div>
-            </div>
+            <div class="activity-card__text"><div class="activity-card__title">Active</div><div class="activity-card__desc">Exercise 6-7 days/week</div></div>
           </div>
           <div class="activity-card ${p.activity === 'very_active' ? 'active' : ''}" onclick="setActivity('very_active')">
             <div class="activity-card__icon">⚡</div>
-            <div class="activity-card__text">
-              <div class="activity-card__title">Very Active</div>
-              <div class="activity-card__desc">Intense exercise daily</div>
-            </div>
+            <div class="activity-card__text"><div class="activity-card__title">Very Active</div><div class="activity-card__desc">Intense exercise daily</div></div>
           </div>
         </div>
       </div>
     </div>
-
     ${NavBar('settings')}
   `;
 }
 
-function setGender(g) {
-  Store.updateProfile({ gender: g });
-  Router.navigate('settings');
-}
-
-function setGoal(g) {
-  Store.updateProfile({ goal: g });
-  Router.navigate('settings');
-}
-
-function setActivity(a) {
-  Store.updateProfile({ activity: a });
-  Router.navigate('settings');
-}
-
+function setGender(g) { Store.updateProfile({ gender: g }); Router.navigate('settings'); }
+function setGoal(g) { Store.updateProfile({ goal: g }); Router.navigate('settings'); }
+function setActivity(a) { Store.updateProfile({ activity: a }); Router.navigate('settings'); }
 function toggleDarkMode(enabled) {
   Store.setDarkMode(enabled);
-  // Update icon without full re-render
   const iconEl = document.querySelector('.dark-mode-toggle__label .icon');
   if (iconEl) iconEl.textContent = enabled ? '🌙' : '☀️';
 }
