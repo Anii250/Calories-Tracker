@@ -169,22 +169,6 @@ const Store = (() => {
     hasOnboarded: false
   };
 
-  function seedMeals() {
-    return {
-      breakfast: [
-        { id: 'b1', name: 'Pancakes with caramel, strawberries and nuts', calories: 568, proteins: 6.6, fats: 5.1, carbs: 40, qty: 1 },
-        { id: 'b2', name: 'Cappuccino', calories: 90, proteins: 3.4, fats: 3.8, carbs: 9.5, qty: 1 }
-      ],
-      lunch: [
-        { id: 'l1', name: 'Grilled chicken salad', calories: 320, proteins: 28.5, fats: 5.2, carbs: 12.0, qty: 1 }
-      ],
-      dinner: [
-        { id: 'd1', name: 'Salmon with vegetables', calories: 212, proteins: 6.8, fats: 4.1, carbs: 15.6, qty: 1 }
-      ],
-      snacks: []
-    };
-  }
-
   function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
   }
@@ -196,11 +180,11 @@ const Store = (() => {
         const data = JSON.parse(raw);
         if (data.today !== getTodayKey()) {
           data.today = getTodayKey();
-          data.meals[getTodayKey()] = seedMeals();
+          data.meals[getTodayKey()] = { breakfast: [], lunch: [], dinner: [], snacks: [] };
           save(data);
         }
         if (!data.meals[getTodayKey()]) {
-          data.meals[getTodayKey()] = seedMeals();
+          data.meals[getTodayKey()] = { breakfast: [], lunch: [], dinner: [], snacks: [] };
           save(data);
         }
         // Ensure new fields
@@ -208,11 +192,22 @@ const Store = (() => {
         if (!data.reminders) data.reminders = defaultData.reminders;
         if (data.hasOnboarded === undefined) data.hasOnboarded = false;
         if (!data.waterTarget) data.waterTarget = 8;
+
+        // MIGRATION: Clear fake data if it was accidentally saved
+        const todayMeals = data.meals[getTodayKey()];
+        if (todayMeals && todayMeals.breakfast && todayMeals.breakfast.some(m => m.id === 'b1' && m.name.includes('Pancakes'))) {
+          data.meals[getTodayKey()] = { breakfast: [], lunch: [], dinner: [], snacks: [] };
+          save(data);
+          if (typeof CloudSync !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser) {
+            CloudSync.saveMeals(getTodayKey(), data.meals[getTodayKey()]);
+          }
+        }
+
         return data;
       }
     } catch (e) { }
     const data = { ...defaultData };
-    data.meals[getTodayKey()] = seedMeals();
+    data.meals[getTodayKey()] = { breakfast: [], lunch: [], dinner: [], snacks: [] };
     save(data);
     return data;
   }

@@ -3,7 +3,7 @@
    ============================================================ */
 
 function CameraCapture() {
-    return `
+  return `
     <div class="camera-capture" id="camera-capture">
       <video id="camera-video" class="camera-capture__video" autoplay playsinline style="display:none;"></video>
       <canvas id="camera-canvas" class="camera-capture__canvas" style="display:none;"></canvas>
@@ -26,60 +26,70 @@ function CameraCapture() {
 let cameraStream = null;
 
 function startCamera() {
-    const video = document.getElementById('camera-video');
-    const btnStart = document.getElementById('btn-start-camera');
-    const btnCapture = document.getElementById('btn-capture');
+  const video = document.getElementById('camera-video');
+  const btnStart = document.getElementById('btn-start-camera');
+  const btnCapture = document.getElementById('btn-capture');
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Camera is not available on this device/browser.');
-        return;
-    }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Camera is not available on this device/browser.');
+    return;
+  }
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(stream => {
-            cameraStream = stream;
-            video.srcObject = stream;
-            video.style.display = 'block';
-            btnStart.style.display = 'none';
-            btnCapture.style.display = 'inline-flex';
-        })
-        .catch(err => {
-            console.log('Camera error:', err);
-            alert('Could not access camera. Please allow camera permission.');
-        });
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      cameraStream = stream;
+      video.srcObject = stream;
+      video.style.display = 'block';
+      btnStart.style.display = 'none';
+      btnCapture.style.display = 'inline-flex';
+    })
+    .catch(err => {
+      console.log('Camera error:', err);
+      alert('Could not access camera. Please allow camera permission.');
+    });
 }
 
 function capturePhoto() {
-    const video = document.getElementById('camera-video');
-    const canvas = document.getElementById('camera-canvas');
-    const preview = document.getElementById('camera-preview');
-    const btnCapture = document.getElementById('btn-capture');
-    const btnRetake = document.getElementById('btn-retake');
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  const preview = document.getElementById('camera-preview');
+  const btnCapture = document.getElementById('btn-capture');
+  const btnRetake = document.getElementById('btn-retake');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
 
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
-    preview.src = imageData;
-    preview.style.display = 'block';
-    video.style.display = 'none';
+  const imageData = canvas.toDataURL('image/jpeg', 0.8);
+  preview.src = imageData;
+  preview.style.display = 'block';
+  video.style.display = 'none';
 
-    // Stop camera
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-        cameraStream = null;
-    }
+  // Stop camera
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
 
-    btnCapture.style.display = 'none';
-    btnRetake.style.display = 'inline-flex';
+  btnCapture.style.display = 'none';
+  btnRetake.style.display = 'inline-flex';
+
+  // Trigger processing
+  if (typeof processScannedImage === 'function') {
+    processScannedImage();
+  }
 }
 
 function retakePhoto() {
-    const preview = document.getElementById('camera-preview');
-    const btnRetake = document.getElementById('btn-retake');
+  const preview = document.getElementById('camera-preview');
+  const btnRetake = document.getElementById('btn-retake');
+  const scannerResult = document.getElementById('scanner-result');
+  const scannerLoader = document.getElementById('scanner-loader');
 
-    preview.style.display = 'none';
-    btnRetake.style.display = 'none';
-    startCamera();
+  preview.style.display = 'none';
+  btnRetake.style.display = 'none';
+  if (scannerResult) scannerResult.style.display = 'none';
+  if (scannerLoader) scannerLoader.style.display = 'none';
+
+  startCamera();
 }
