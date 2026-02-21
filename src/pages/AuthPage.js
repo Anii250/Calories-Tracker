@@ -5,7 +5,7 @@
 let authMode = 'login'; // 'login' or 'signup'
 
 function AuthPage() {
-    return `
+  return `
     <div class="page auth-page" id="auth-page">
       <div class="auth-container">
         <div class="auth-logo">🥗</div>
@@ -51,8 +51,8 @@ function AuthPage() {
 
         <div class="auth-switch">
           ${authMode === 'login'
-            ? 'Don\'t have an account? <a href="#" onclick="switchAuthMode(\'signup\')">Sign Up</a>'
-            : 'Already have an account? <a href="#" onclick="switchAuthMode(\'login\')">Sign In</a>'}
+      ? 'Don\'t have an account? <a href="#" onclick="switchAuthMode(\'signup\')">Sign Up</a>'
+      : 'Already have an account? <a href="#" onclick="switchAuthMode(\'login\')">Sign In</a>'}
         </div>
       </div>
     </div>
@@ -60,67 +60,68 @@ function AuthPage() {
 }
 
 function switchAuthMode(mode) {
-    authMode = mode;
-    const app = document.getElementById('app');
-    if (app) app.innerHTML = AuthPage();
+  authMode = mode;
+  const app = document.getElementById('app');
+  if (app) app.innerHTML = AuthPage();
 }
 
 async function handleAuthSubmit() {
-    const email = document.getElementById('auth-email')?.value?.trim();
-    const password = document.getElementById('auth-password')?.value;
-    const name = document.getElementById('auth-name')?.value?.trim();
-    const errorEl = document.getElementById('auth-error');
-    const btn = document.getElementById('auth-submit-btn');
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const password = document.getElementById('auth-password')?.value;
+  const name = document.getElementById('auth-name')?.value?.trim();
+  const errorEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-submit-btn');
 
-    if (!email || !password) {
-        showAuthError('Please fill in all fields.');
-        return;
-    }
+  if (!email || !password) {
+    showAuthError('Please fill in all fields.');
+    return;
+  }
 
-    btn.textContent = 'Loading...';
-    btn.disabled = true;
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
 
-    try {
-        if (authMode === 'signup') {
-            if (password.length < 6) {
-                showAuthError('Password must be at least 6 characters.');
-                btn.textContent = 'Create Account';
-                btn.disabled = false;
-                return;
-            }
-            await Auth.signUpEmail(email, password, name);
-        } else {
-            await Auth.loginEmail(email, password);
-        }
-        // Auth state listener will handle navigation
-    } catch (err) {
-        let msg = 'Something went wrong. Try again.';
-        if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
-        else if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
-        else if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered.';
-        else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email.';
-        else if (err.code === 'auth/weak-password') msg = 'Password is too weak (6+ characters).';
-        showAuthError(msg);
-        btn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+  try {
+    if (authMode === 'signup') {
+      if (password.length < 6) {
+        showAuthError('Password must be at least 6 characters.');
+        btn.textContent = 'Create Account';
         btn.disabled = false;
+        return;
+      }
+      await Auth.signUpEmail(email, password, name);
+    } else {
+      await Auth.loginEmail(email, password);
     }
+    // Auth state listener will handle navigation
+  } catch (err) {
+    let msg = err.message || 'Something went wrong. Try again.';
+    if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
+    else if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
+    else if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered.';
+    else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email.';
+    else if (err.code === 'auth/weak-password') msg = 'Password is too weak (6+ characters).';
+    else if (err.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.' || err.message?.includes('API key')) msg = 'Invalid API key. Please check Firebase config.';
+    showAuthError(msg);
+    btn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+    btn.disabled = false;
+  }
 }
 
 async function handleGoogleSignIn() {
-    try {
-        await Auth.loginGoogle();
-    } catch (err) {
-        if (err.code !== 'auth/popup-closed-by-user') {
-            showAuthError('Google sign-in failed. Try again.');
-        }
+  try {
+    await Auth.loginGoogle();
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showAuthError('Google sign-in failed. Try again.');
     }
+  }
 }
 
 function showAuthError(msg) {
-    const el = document.getElementById('auth-error');
-    if (el) {
-        el.textContent = msg;
-        el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
+  const el = document.getElementById('auth-error');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
 }

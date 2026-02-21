@@ -3,12 +3,12 @@
    ============================================================ */
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB1oxRFoH8ypDjUv22RmbXMMlSuRBa14WE",
+    apiKey: "AIzaSyB1oxRfoH8ypDjUv22RmbXMWLSuRBa14WE",
     authDomain: "calorieai-aacbc.firebaseapp.com",
     projectId: "calorieai-aacbc",
     storageBucket: "calorieai-aacbc.firebasestorage.app",
     messagingSenderId: "593978879361",
-    appId: "1:593978879361:web:249e3e62ffe72f5a3c9c80",
+    appId: "1:593978879361:web:240e3e62ffe72f5a3c0c80",
     measurementId: "G-HBGVJ61BV6"
 };
 
