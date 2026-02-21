@@ -39,11 +39,15 @@ const NutritionAPI = (() => {
         }
 
         // Fallback: Open Food Facts (free, no key)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         try {
             const res = await fetch(
                 `${OFF_URL}?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,nutriments`,
-                { signal: AbortSignal.timeout(5000) }
+                { signal: controller.signal }
             );
+            clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
                 return (data.products || [])
