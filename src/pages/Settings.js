@@ -113,6 +113,18 @@ function SettingsPage() {
         </div>
       </div>
 
+      <!-- API Key Settings -->
+      <div class="settings-section">
+        <div class="settings-section__title">Real-Time API Settings</div>
+        <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px; line-height: 1.4;">
+          For accurate, real-time food tracking, enter a free CalorieNinjas API key. Get one at <a href="https://calorieninjas.com/api" target="_blank" style="color: var(--accent); text-decoration: underline;">calorieninjas.com</a>.
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <input type="password" id="api-key-input" placeholder="Enter API Key here" value="${Store.getApiKey()}" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color);" />
+          <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+        </div>
+      </div>
+
       <!-- Logout -->
       <div class="settings-section" style="margin-top:16px;">
         <button class="btn auth-logout-btn" onclick="Auth.logout()" style="width:100%;">
@@ -133,4 +145,11 @@ function toggleDarkMode(enabled) {
   Store.setDarkMode(enabled);
   const iconEl = document.querySelector('.dark-mode-toggle__label .icon');
   if (iconEl) iconEl.textContent = enabled ? '🌙' : '☀️';
+}
+function saveApiKey() {
+  const input = document.getElementById('api-key-input');
+  if (input) {
+    Store.setApiKey(input.value);
+    alert('API Key saved successfully!');
+  }
 }

@@ -54,6 +54,21 @@ function handleFoodSearch(query) {
     const results = Store.searchFood(query);
     renderFoodResults(results, container, '📦');
   } else {
+    // Check if API key exists
+    if (!Store.getApiKey()) {
+      container.innerHTML = `
+        <div class="food-search__empty" style="padding: 24px; text-align: center;">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
+          <h4 style="margin-bottom: 8px;">API Key Required</h4>
+          <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 16px;">
+            To search for real-time accurate food data online, please configure your free API Key in the Settings.
+          </p>
+          <button class="btn btn-primary" onclick="Router.navigate('settings')" style="padding: 8px 16px; font-size: 14px;">Go to Settings</button>
+        </div>
+      `;
+      return;
+    }
+
     // Search online — debounce 500ms
     container.innerHTML = '<div class="food-search__empty">🔍 Searching online...</div>';
     searchTimeout = setTimeout(async () => {

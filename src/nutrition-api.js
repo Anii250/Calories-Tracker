@@ -4,7 +4,6 @@
 
 const NutritionAPI = (() => {
     // Free API — get your key at https://calorieninjas.com/api
-    const API_KEY = '';  // User can add their key for more requests
     const BASE_URL = 'https://api.calorieninjas.com/v1/nutrition';
 
     // Fallback: use Open Food Facts (no key needed)
@@ -14,10 +13,11 @@ const NutritionAPI = (() => {
         if (!query || query.length < 2) return [];
 
         // Try CalorieNinjas first if key is set
-        if (API_KEY) {
+        const apiKey = typeof Store !== 'undefined' ? Store.getApiKey() : '';
+        if (apiKey) {
             try {
                 const res = await fetch(`${BASE_URL}?query=${encodeURIComponent(query)}`, {
-                    headers: { 'X-Api-Key': API_KEY }
+                    headers: { 'X-Api-Key': apiKey }
                 });
                 if (res.ok) {
                     const data = await res.json();

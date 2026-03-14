@@ -424,6 +424,19 @@ const Store = (() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }
 
+  // ---- API Key ----
+  function getApiKey() {
+    return localStorage.getItem('calorieai_apikey') || '';
+  }
+
+  function setApiKey(key) {
+    if (key) {
+      localStorage.setItem('calorieai_apikey', key.trim());
+    } else {
+      localStorage.removeItem('calorieai_apikey');
+    }
+  }
+
   // Cloud sync helpers
   function mergeCloudData(cloudData) {
     if (!cloudData) return;
@@ -462,6 +475,7 @@ const Store = (() => {
     hasOnboarded, completeOnboarding,
     exportCSV, searchFood, getFoodDatabase,
     getDarkMode, setDarkMode, initTheme,
+    getApiKey, setApiKey,
     mergeCloudData, syncToCloud
   };
 })();
