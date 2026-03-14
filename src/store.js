@@ -426,7 +426,7 @@ const Store = (() => {
 
   // ---- API Key ----
   function getApiKey() {
-    return localStorage.getItem('calorieai_apikey') || '';
+    return localStorage.getItem('calorieai_apikey') || 'SrCMtDwN3/ZkYwBRMQY87w==Q5S01WmpQYzieSR9';
   }
 
   function setApiKey(key) {
