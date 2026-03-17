@@ -193,7 +193,7 @@ function addScannedFood() {
   const f = parseFloat((currentScannedFood.fats * scannerQty).toFixed(1));
   const c = parseFloat((currentScannedFood.carbs * scannerQty).toFixed(1));
 
-  Store.addMeal('lunch', { // Defaulting to lunch for scanner
+  Store.addMeal(getMealTypeByTime(), { // Auto-detect meal type by time of day
     name: currentScannedFood.name.charAt(0).toUpperCase() + currentScannedFood.name.slice(1),
     calories: cal, proteins: p, fats: f, carbs: c, qty: scannerQty
   });
