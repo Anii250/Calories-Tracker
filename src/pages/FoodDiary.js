@@ -2,12 +2,83 @@
    Food Diary Page — Main dashboard
    ============================================================ */
 
+let diaryViewDate = null; // null = today
+
+function getViewDateKey() {
+  return diaryViewDate || new Date().toISOString().slice(0, 10);
+}
+
+function getViewDateLabel() {
+  if (!diaryViewDate) return Store.getFormattedToday();
+  const d = new Date(diaryViewDate + 'T00:00:00');
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+function isViewingToday() {
+  return !diaryViewDate || diaryViewDate === new Date().toISOString().slice(0, 10);
+}
+
+function openDatePicker() {
+  const today = new Date().toISOString().slice(0, 10);
+  const existing = document.getElementById('date-picker-overlay');
+  if (existing) { existing.remove(); return; }
+
+  const html = `
+    <div id="date-picker-overlay" style="
+      position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+      display:flex;align-items:center;justify-content:center;padding:20px;
+    " onclick="this.remove()">
+      <div style="
+        background:var(--card);border-radius:20px;padding:24px;width:100%;max-width:340px;
+        box-shadow:0 8px 32px rgba(0,0,0,.3);
+      " onclick="event.stopPropagation()">
+        <h3 style="margin:0 0 16px;text-align:center;">📅 Pick a Date</h3>
+        <input type="date" id="diary-date-input" 
+          value="${diaryViewDate || today}" 
+          max="${today}"
+          style="
+            width:100%;padding:12px;border-radius:12px;
+            border:1px solid var(--border);background:var(--bg);
+            color:var(--text);font-size:1rem;box-sizing:border-box;
+          "
+        />
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('date-picker-overlay').remove()">Cancel</button>
+          <button class="btn btn-primary" style="flex:1" onclick="applyDiaryDate()">View Day</button>
+        </div>
+        ${!isViewingToday() ? `<button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="goBackToToday()">⬅ Back to Today</button>` : ''}
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function applyDiaryDate() {
+  const val = document.getElementById('diary-date-input')?.value;
+  if (!val) return;
+  const today = new Date().toISOString().slice(0, 10);
+  diaryViewDate = (val === today) ? null : val;
+  document.getElementById('date-picker-overlay')?.remove();
+  Router.navigate('diary');
+}
+
+function goBackToToday() {
+  diaryViewDate = null;
+  document.getElementById('date-picker-overlay')?.remove();
+  Router.navigate('diary');
+}
+
 function FoodDiaryPage() {
-  const totals = Store.getTotals();
+  const dateKey = getViewDateKey();
+  const totals = Store.getTotals(dateKey);
   const dailyGoal = Store.getDailyGoal();
-  const meals = Store.getTodayMeals();
+  const data = Store.getState();
+  const meals = data.meals[dateKey] || { breakfast: [], lunch: [], dinner: [], snacks: [] };
   const eaten = totals.cal;
-  const dateStr = Store.getFormattedToday();
+  const dateStr = getViewDateLabel();
 
   return `
     <div class="page" id="food-diary-page">
@@ -40,10 +111,20 @@ function FoodDiaryPage() {
           <h2>Today:</h2>
           <span>${dateStr}</span>
         </div>
-        <div class="date-row__icon">
+        <button class="page-header__icon" onclick="openDatePicker()" style="background:rgba(255,255,255,0.08);border-radius:12px;" title="View past days">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
+        </button>
       </div>
+
+      ${!isViewingToday() ? `
+      <div style="
+        background:var(--accent);color:#fff;text-align:center;padding:8px 16px;
+        border-radius:12px;font-size:.85rem;font-weight:600;margin-bottom:4px;
+        display:flex;align-items:center;justify-content:space-between;
+      ">
+        <span>📅 Viewing past day</span>
+        <button onclick="goBackToToday()" style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:4px 10px;border-radius:8px;font-size:.8rem;cursor:pointer;">Today →</button>
+      </div>` : ''}
 
       <!-- Progress Ring -->
       ${ProgressRing(eaten, dailyGoal)}
@@ -65,10 +146,10 @@ function FoodDiaryPage() {
         ${MealSection('snacks', meals.snacks)}
       </div>
 
-      <!-- FAB -->
-      <button class="fab" id="fab-add" onclick="openAddFoodModal()">
+      <!-- FAB — only show when viewing today -->
+      ${isViewingToday() ? `<button class="fab" id="fab-add" onclick="openAddFoodModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
+      </button>` : ''}
     </div>
 
     ${NavBar('diary')}
