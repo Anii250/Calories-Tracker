@@ -65,56 +65,80 @@ async function processScannedImage() {
   document.getElementById('scanner-loader').style.display = 'block';
   document.getElementById('scanner-result').style.display = 'none';
 
-  // 1. Simulate AI Image Recognition (predicting what's in the photo)
-  const commonFoods = ['Banana', 'Apple', 'Pizza', 'Burger', 'Coffee', 'Salad', 'Oatmeal', 'Chicken Breast', 'Rice', 'Avocado Toast'];
-  const recognizedName = commonFoods[Math.floor(Math.random() * commonFoods.length)];
+  let recognizedName = 'Apple'; // Fallback if AI fails
 
-  // 2. Fetch REAL nutrition data from API based on the recognized food
   try {
+    // 1. Load TensorFlow.js & MobileNet dynamically if needed
+    if (!window.mobilenetModel) {
+      document.querySelector('#scanner-loader h3').textContent = 'Loading AI Model...';
+      document.querySelector('#scanner-loader .text-muted').textContent = 'First time takes a few seconds';
+
+      if (typeof mobilenet === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const script1 = document.createElement('script');
+          script1.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
+          script1.onload = () => {
+            const script2 = document.createElement('script');
+            script2.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest';
+            script2.onload = resolve;
+            script2.onerror = reject;
+            document.head.appendChild(script2);
+          };
+          script1.onerror = reject;
+          document.head.appendChild(script1);
+        });
+      }
+      
+      window.mobilenetModel = await mobilenet.load({ version: 2, alpha: 1.0 });
+    }
+
+    document.querySelector('#scanner-loader h3').textContent = 'Analyzing Food...';
+    document.querySelector('#scanner-loader .text-muted').textContent = 'Using computer vision & Nutrition API';
+
+    // 2. Classify the image using the camera preview element
+    const imgEl = document.getElementById('camera-preview');
+    const predictions = await window.mobilenetModel.classify(imgEl);
+    console.log("AI Predictions:", predictions);
+
+    if (predictions && predictions.length > 0) {
+      // e.g. "Granny Smith, apple" -> "apple"
+      // e.g. "cheeseburger, hamburger, burger" -> "cheeseburger"
+      recognizedName = predictions[0].className.split(',')[0].trim();
+    }
+
+    // 3. Fetch REAL nutrition data from API based on the recognized food
     const results = await NutritionAPI.searchFood(recognizedName);
 
     document.getElementById('scanner-loader').style.display = 'none';
 
     if (results && results.length > 0) {
       currentScannedFood = results[0]; // Take top result
+      currentScannedFood.name = recognizedName; // Use the AI's short name
       scannerQty = 1;
       renderScannerResult();
     } else {
-      // Fallback if API returns empty
-      useOfflineFallback(recognizedName);
+      showScannerError(recognizedName);
     }
   } catch (err) {
     document.getElementById('scanner-loader').style.display = 'none';
-    console.log("Network error in scanner API:", err);
-    // Use offline fallback instead of showing an error alert
-    useOfflineFallback(recognizedName);
+    showScannerError(null);
   }
 }
 
-function useOfflineFallback(foodName) {
-  // A small local database to fall back on if the internet APIs fail
-  const offlineDB = {
-    'Banana': { calories: 105, proteins: 1.3, fats: 0.3, carbs: 27, fiber: 3.1, sugar: 14.4 },
-    'Apple': { calories: 95, proteins: 0.5, fats: 0.3, carbs: 25, fiber: 4.4, sugar: 19 },
-    'Pizza': { calories: 285, proteins: 12, fats: 10, carbs: 36, fiber: 2.5, sugar: 3.8 },
-    'Burger': { calories: 350, proteins: 15, fats: 14, carbs: 40, fiber: 2, sugar: 6 },
-    'Coffee': { calories: 5, proteins: 0.3, fats: 0, carbs: 0, fiber: 0, sugar: 0 },
-    'Salad': { calories: 150, proteins: 5, fats: 10, carbs: 12, fiber: 4, sugar: 3 },
-    'Oatmeal': { calories: 150, proteins: 5, fats: 3, carbs: 27, fiber: 4, sugar: 1 },
-    'Chicken Breast': { calories: 165, proteins: 31, fats: 3.6, carbs: 0, fiber: 0, sugar: 0 },
-    'Rice': { calories: 205, proteins: 4.3, fats: 0.4, carbs: 45, fiber: 0.6, sugar: 0.1 },
-    'Avocado Toast': { calories: 250, proteins: 6, fats: 15, carbs: 24, fiber: 7, sugar: 2 }
-  };
-
-  const data = offlineDB[foodName] || offlineDB['Apple'];
-  currentScannedFood = {
-    name: foodName,
-    ...data,
-    serving: '1 normal serving',
-    source: 'offline_database' // Mark as offline fallback
-  };
-  scannerQty = 1;
-  renderScannerResult();
+function showScannerError(recognizedName) {
+  const loader = document.getElementById('scanner-loader');
+  if (loader) loader.style.display = 'none';
+  // Show a friendly error in the result panel
+  const resultEl = document.getElementById('scanner-result');
+  resultEl.style.display = 'block';
+  document.getElementById('scanner-alert').style.display = 'block';
+  document.getElementById('scanner-source').textContent = recognizedName
+    ? `Detected "${recognizedName}" but could not find nutritional data. Try retaking with better lighting or a clearer angle.`
+    : 'Could not analyze the image. Please check your internet connection and try again.';
+  document.getElementById('scanner-name').textContent = recognizedName || '❌ Scan Failed';
+  document.getElementById('scanner-macros').innerHTML = MacroBar(0, 0, 0, 0);
+  document.getElementById('scanner-composition').innerHTML = '';
+  document.getElementById('btn-add-scanned').style.display = 'none';
 }
 
 function renderScannerResult() {
@@ -122,11 +146,9 @@ function renderScannerResult() {
 
   document.getElementById('scanner-result').style.display = 'block';
   document.getElementById('scanner-alert').style.display = 'block';
+  document.getElementById('btn-add-scanned').style.display = ''; // Ensure button is visible
 
-  let srcString = 'OpenFoodFacts API';
-  if (currentScannedFood.source === 'calorieninjas') srcString = 'CalorieNinjas API';
-  else if (currentScannedFood.source === 'offline_database') srcString = 'Offline Built-in Database';
-
+  const srcString = currentScannedFood.source === 'calorieninjas' ? 'CalorieNinjas API' : 'OpenFoodFacts API';
   document.getElementById('scanner-source').textContent = `Real nutrition data fetched from ${srcString}.`;
 
   document.getElementById('scanner-name').textContent = currentScannedFood.name.charAt(0).toUpperCase() + currentScannedFood.name.slice(1);

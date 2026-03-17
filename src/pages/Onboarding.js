@@ -111,5 +111,7 @@ function nextOnboardingStep() {
 
 function finishOnboarding() {
     Store.completeOnboarding({ gender: obGender, goal: obGoal });
+    // Push to Firestore immediately so it's never asked again on any device
+    Store.syncToCloud();
     Router.navigate('diary');
 }

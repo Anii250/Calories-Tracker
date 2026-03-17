@@ -2,13 +2,15 @@
    CalorieAI — Service Worker (offline caching)
    ============================================================ */
 
-const CACHE_NAME = 'calorieai-v6';
+const CACHE_NAME = 'calorieai-v7';
 
 const PRECACHE_URLS = [
     './',
     './index.html',
     './manifest.json',
     './styles/index.css',
+    './src/firebase-config.js',
+    './src/nutrition-api.js?v=6',
     './src/store.js',
     './src/main.js',
     './src/components/ProgressRing.js',
@@ -23,9 +25,10 @@ const PRECACHE_URLS = [
     './src/components/CameraCapture.js',
     './src/components/MealReminders.js',
     './src/components/ExportData.js',
+    './src/pages/AuthPage.js',
     './src/pages/FoodDiary.js',
     './src/pages/Charts.js',
-    './src/pages/Scanner.js',
+    './src/pages/Scanner.js?v=6',
     './src/pages/Settings.js',
     './src/pages/Onboarding.js'
 ];

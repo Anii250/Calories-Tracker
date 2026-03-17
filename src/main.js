@@ -86,10 +86,15 @@ const Router = (() => {
         // Listen for Firebase auth state
         Auth.onAuthChanged(async (user) => {
             if (user) {
-                // Sync from cloud on login
-                const cloudData = await CloudSync.loadFromCloud();
-                if (cloudData) {
-                    Store.mergeCloudData(cloudData);
+                // Sync from cloud on login — MUST happen before render()
+                // so that hasOnboarded and profile are available for routing
+                try {
+                    const cloudData = await CloudSync.loadFromCloud();
+                    if (cloudData) {
+                        Store.mergeCloudData(cloudData);
+                    }
+                } catch (e) {
+                    // Cloud unavailable — use whatever is in localStorage
                 }
             }
             render();
