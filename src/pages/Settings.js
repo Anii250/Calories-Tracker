@@ -113,6 +113,20 @@ function SettingsPage() {
         </div>
       </div>
 
+      <!-- Daily Steps Goal -->
+      <div class="settings-section">
+        <div class="settings-section__title">👟 Daily Steps Goal</div>
+        <div class="steps-goal-presets">
+          ${[5000, 8000, 10000, 12000, 15000].map(v => `
+            <button class="steps-goal-preset ${Store.getStepsTarget() === v ? 'active' : ''}" onclick="setStepsGoal(${v})">${(v/1000).toFixed(0)}k</button>
+          `).join('')}
+        </div>
+        <div class="steps-goal-custom">
+          <input type="number" id="custom-steps-goal" placeholder="Custom goal..." min="1000" step="500" value="${Store.getStepsTarget()}" />
+          <button class="btn btn-primary" style="padding:10px 16px;font-size:.82rem;" onclick="setCustomStepsGoal()">Set</button>
+        </div>
+      </div>
+
       <!-- API Key Settings -->
       <div class="settings-section">
         <div class="settings-section__title">Real-Time API Settings</div>
@@ -151,5 +165,17 @@ function saveApiKey() {
   if (input) {
     Store.setApiKey(input.value);
     alert('API Key saved successfully!');
+  }
+}
+function setStepsGoal(val) {
+  Store.setStepsTarget(val);
+  Router.navigate('settings');
+}
+function setCustomStepsGoal() {
+  const input = document.getElementById('custom-steps-goal');
+  const val = parseInt(input?.value);
+  if (val && val >= 100) {
+    Store.setStepsTarget(val);
+    Router.navigate('settings');
   }
 }

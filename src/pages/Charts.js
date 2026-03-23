@@ -150,6 +150,8 @@ function renderChartStats(data, goal) {
     const max = Math.max(...withCals.map(d => d.cal));
     const min = Math.min(...withCals.map(d => d.cal));
     const underGoal = withCals.filter(d => d.cal <= goal).length;
+    const withSteps = data.filter(d => d.steps > 0);
+    const avgSteps = withSteps.length > 0 ? Math.round(withSteps.reduce((s, d) => s + d.steps, 0) / withSteps.length) : 0;
 
     statsEl.innerHTML = `
     <div class="chart-stats-grid">
@@ -168,6 +170,10 @@ function renderChartStats(data, goal) {
       <div class="chart-stat-card">
         <div class="chart-stat-card__value" style="color:var(--accent)">${underGoal}/${withCals.length}</div>
         <div class="chart-stat-card__label">Under Goal</div>
+      </div>
+      <div class="chart-stat-card">
+        <div class="chart-stat-card__value">👟 ${avgSteps.toLocaleString()}</div>
+        <div class="chart-stat-card__label">Avg Steps</div>
       </div>
     </div>
   `;

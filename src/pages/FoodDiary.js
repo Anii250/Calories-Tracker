@@ -137,6 +137,11 @@ function FoodDiaryPage() {
         ${WaterTracker()}
       </div>
 
+      <!-- Steps Tracker -->
+      <div id="steps-section" style="margin-top:12px;">
+        ${StepsTracker()}
+      </div>
+
       <!-- Eaten section -->
       <div class="section-title">Eaten:</div>
       <div id="meals-list">

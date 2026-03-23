@@ -162,9 +162,11 @@ const Store = (() => {
     },
     dailyGoal: 1500,
     waterTarget: 8,
+    stepsTarget: 10000,
     today: getTodayKey(),
     meals: {},
     water: {},
+    steps: {},
     reminders: { breakfast: '08:00', lunch: '13:00', dinner: '19:00', enabled: false },
     hasOnboarded: false
   };
@@ -189,9 +191,11 @@ const Store = (() => {
         }
         // Ensure new fields
         if (!data.water) data.water = {};
+        if (!data.steps) data.steps = {};
         if (!data.reminders) data.reminders = defaultData.reminders;
         if (data.hasOnboarded === undefined) data.hasOnboarded = false;
         if (!data.waterTarget) data.waterTarget = 8;
+        if (!data.stepsTarget) data.stepsTarget = 10000;
 
         // MIGRATION: Clear fake data if it was accidentally saved
         const todayMeals = data.meals[getTodayKey()];
@@ -292,6 +296,38 @@ const Store = (() => {
     return load().waterTarget || 8;
   }
 
+  // ---- Steps Tracking ----
+  function getSteps(dateKey) {
+    const data = load();
+    return (data.steps || {})[dateKey || getTodayKey()] || 0;
+  }
+
+  function setSteps(count, dateKey) {
+    const data = load();
+    if (!data.steps) data.steps = {};
+    const key = dateKey || getTodayKey();
+    data.steps[key] = Math.max(0, count);
+    save(data);
+    return data;
+  }
+
+  function addSteps(amount) {
+    const current = getSteps();
+    return setSteps(current + amount);
+  }
+
+  function getStepsTarget() {
+    return load().stepsTarget || 10000;
+  }
+
+  function setStepsTarget(target) {
+    const data = load();
+    data.stepsTarget = target;
+    save(data);
+    syncToCloud();
+    return data;
+  }
+
   // ---- Streak ----
   function getStreak() {
     const data = load();
@@ -336,7 +372,8 @@ const Store = (() => {
         cal: totals.cal,
         proteins: totals.proteins,
         fats: totals.fats,
-        carbs: totals.carbs
+        carbs: totals.carbs,
+        steps: getSteps(key)
       });
     }
     return days;
@@ -353,7 +390,8 @@ const Store = (() => {
       days.push({
         label: `${dt.getDate()}`,
         date: key,
-        cal: totals.cal
+        cal: totals.cal,
+        steps: getSteps(key)
       });
     }
     return days;
@@ -444,6 +482,7 @@ const Store = (() => {
     if (cloudData.profile) data.profile = { ...data.profile, ...cloudData.profile };
     if (cloudData.dailyGoal) data.dailyGoal = cloudData.dailyGoal;
     if (cloudData.waterTarget) data.waterTarget = cloudData.waterTarget;
+    if (cloudData.stepsTarget) data.stepsTarget = cloudData.stepsTarget;
     if (cloudData.reminders) data.reminders = cloudData.reminders;
     if (typeof cloudData.hasOnboarded !== 'undefined') data.hasOnboarded = cloudData.hasOnboarded;
     save(data);
@@ -469,6 +508,7 @@ const Store = (() => {
     getState, updateProfile, getTodayMeals, addMeal, removeMeal,
     getTotals, getDailyGoal, getFormattedToday,
     getWater, setWater, getWaterTarget,
+    getSteps, setSteps, addSteps, getStepsTarget, setStepsTarget,
     getStreak,
     getWeeklyData, getMonthlyData,
     getReminders, updateReminders,

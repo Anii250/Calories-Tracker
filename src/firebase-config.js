@@ -78,6 +78,7 @@ const Auth = (() => {
                 },
                 dailyGoal: 1500,
                 waterTarget: 8,
+                stepsTarget: 10000,
                 reminders: { breakfast: '08:00', lunch: '13:00', dinner: '19:00', enabled: false },
                 hasOnboarded: false
             });
@@ -114,6 +115,7 @@ const CloudSync = (() => {
                 profile: data.profile || {},
                 dailyGoal: data.dailyGoal || 1500,
                 waterTarget: data.waterTarget || 8,
+                stepsTarget: data.stepsTarget || 10000,
                 reminders: data.reminders || {},
                 hasOnboarded: data.hasOnboarded || false
             });
@@ -176,8 +178,28 @@ const CloudSync = (() => {
         return 0;
     }
 
+    async function saveSteps(dateKey, steps) {
+        const ref = getUserRef();
+        if (!ref) return;
+        try {
+            await ref.collection('steps').doc(dateKey).set({ count: steps });
+        } catch (e) {
+            console.log('Steps sync error:', e);
+        }
+    }
+
+    async function loadSteps(dateKey) {
+        const ref = getUserRef();
+        if (!ref) return 0;
+        try {
+            const doc = await ref.collection('steps').doc(dateKey).get();
+            if (doc.exists) return doc.data().count || 0;
+        } catch (e) { }
+        return 0;
+    }
+
     return {
-        saveToCloud, saveMeals, saveWater,
-        loadFromCloud, loadMeals, loadWater
+        saveToCloud, saveMeals, saveWater, saveSteps,
+        loadFromCloud, loadMeals, loadWater, loadSteps
     };
 })();
