@@ -78,6 +78,12 @@ function handleFoodSearch(query) {
         <span>Searching CalorieNinjas...</span>
       </div>`;
 
+    // Disable search button while loading
+    const searchBtn = document.querySelector('.food-search__search-btn');
+    const searchInput = document.getElementById('food-search-input');
+    if (searchBtn) { searchBtn.disabled = true; searchBtn.style.opacity = '0.5'; }
+    if (searchInput) searchInput.disabled = true;
+
     searchTimeout = setTimeout(async () => {
       try {
         const results = await NutritionAPI.searchFood(query);
@@ -89,13 +95,13 @@ function handleFoodSearch(query) {
           icon = '🔑'; title = 'Invalid API Key';
           desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
         } else if (e.message === 'NO_RESULTS') {
-          icon = '🔍'; title = 'No results found';
+          icon = '🔍'; title = 'No food found';
           desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
         } else if (e.message === 'TIMEOUT') {
           icon = '⏳'; title = 'Request timed out';
           desc = 'The server took too long. Check your connection and try again.';
         } else if (e.message === 'NETWORK_ERROR') {
-          icon = '📡'; title = 'Network error';
+          icon = '📡'; title = 'Error fetching data';
           desc = 'Check your internet connection and try again.';
         }
 
@@ -105,6 +111,12 @@ function handleFoodSearch(query) {
             <div><strong>${title}</strong></div>
             <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
           </div>`;
+      } finally {
+        // Re-enable search button and input
+        const btn = document.querySelector('.food-search__search-btn');
+        const inp = document.getElementById('food-search-input');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+        if (inp) inp.disabled = false;
       }
     }, 400);
   }
