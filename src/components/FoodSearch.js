@@ -23,15 +23,15 @@ function FoodSearch(mealType) {
         </button>
       </div>
       <div class="food-search__tabs">
-        <button class="food-search__tab active" id="fs-tab-local" onclick="switchFoodTab('local')">📦 Local</button>
-        <button class="food-search__tab" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 Online</button>
+        <button class="food-search__tab active" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 CalorieNinjas</button>
+        <button class="food-search__tab" id="fs-tab-local" onclick="switchFoodTab('local')">📦 Local</button>
       </div>
       <div class="food-search__results" id="food-search-results"></div>
     </div>
   `;
 }
 
-let currentFoodTab = 'local';
+let currentFoodTab = 'online';
 
 function switchFoodTab(tab) {
   currentFoodTab = tab;
