@@ -14,7 +14,6 @@ function FoodSearch(mealType) {
           class="food-search__input"
           id="food-search-input"
           placeholder="Search foods (e.g. 2 eggs, 1 cup rice...)"
-          oninput="handleFoodSearch(this.value)"
           onkeydown="if(event.key==='Enter'){event.preventDefault();handleFoodSearch(this.value);}"
           autocomplete="off"
         />
