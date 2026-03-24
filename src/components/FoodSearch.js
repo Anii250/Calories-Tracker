@@ -14,6 +14,7 @@ function FoodSearch(mealType) {
           class="food-search__input"
           id="food-search-input"
           placeholder="Search foods (e.g. 2 eggs, 1 cup rice...)"
+          oninput="debouncedSearch(this.value)"
           onkeydown="if(event.key==='Enter'){event.preventDefault();handleFoodSearch(this.value);}"
           autocomplete="off"
         />
@@ -41,13 +42,20 @@ function switchFoodTab(tab) {
   if (query.length >= 2) handleFoodSearch(query);
 }
 
-function handleFoodSearch(query) {
+function debouncedSearch(query) {
   if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    handleFoodSearch(query);
+  }, 700); // 700ms debounce
+}
+
+async function handleFoodSearch(query) {
+  if (searchTimeout) clearTimeout(searchTimeout); // Cancel any pending debounce if called directly (e.g. via Enter key)
 
   const container = document.getElementById('food-search-results');
   if (!container) return;
 
-  if (!query || query.length < 2) {
+  if (!query || query.trim().length < 2) {
     container.innerHTML = '';
     return;
   }
@@ -83,41 +91,40 @@ function handleFoodSearch(query) {
     if (searchBtn) { searchBtn.disabled = true; searchBtn.style.opacity = '0.5'; }
     if (searchInput) searchInput.disabled = true;
 
-    searchTimeout = setTimeout(async () => {
-      try {
-        const results = await NutritionAPI.searchFood(query);
-        renderFoodCards(results, container);
-      } catch (e) {
-        let icon = '⚠️', title = 'Something went wrong', desc = 'Please try again later.';
+    try {
+      const results = await NutritionAPI.searchFood(query);
+      renderFoodCards(results, container);
+    } catch (e) {
+      let icon = '⚠️', title = 'Something went wrong', desc = 'Please try again later.';
 
-        if (e.message === 'INVALID_KEY') {
-          icon = '🔑'; title = 'Invalid API Key';
-          desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
-        } else if (e.message === 'NO_RESULTS') {
-          icon = '🔍'; title = 'No food found';
-          desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
-        } else if (e.message === 'TIMEOUT') {
-          icon = '⏳'; title = 'Request timed out';
-          desc = 'The server took too long. Check your connection and try again.';
-        } else if (e.message === 'NETWORK_ERROR') {
-          icon = '📡'; title = 'Error fetching data';
-          desc = 'Check your internet connection and try again.';
-        }
-
-        container.innerHTML = `
-          <div class="food-search__empty">
-            <div style="font-size:1.8rem;margin-bottom:6px;">${icon}</div>
-            <div><strong>${title}</strong></div>
-            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
-          </div>`;
-      } finally {
-        // Re-enable search button and input
-        const btn = document.querySelector('.food-search__search-btn');
-        const inp = document.getElementById('food-search-input');
-        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-        if (inp) inp.disabled = false;
+      if (e.message === 'INVALID_KEY') {
+        icon = '🔑'; title = 'Invalid API Key';
+        desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
+      } else if (e.message === 'NO_RESULTS') {
+        icon = '🔍'; title = 'No food found';
+        desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
+      } else if (e.message === 'TIMEOUT') {
+        icon = '⏳'; title = 'Request timed out';
+        desc = 'The server took too long. Check your connection and try again.';
+      } else if (e.message === 'NETWORK_ERROR') {
+        icon = '📡'; title = 'Error fetching data';
+        desc = 'Check your internet connection and try again.';
       }
-    }, 400);
+
+      container.innerHTML = `
+        <div class="food-search__empty">
+          <div style="font-size:1.8rem;margin-bottom:6px;">${icon}</div>
+          <div><strong>${title}</strong></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
+        </div>`;
+    } finally {
+      // Re-enable search button and input
+      if (searchBtn) { searchBtn.disabled = false; searchBtn.style.opacity = '1'; }
+      if (searchInput) {
+        searchInput.disabled = false;
+        searchInput.focus(); // keep focus after loading
+      }
+    }
   }
 }
 
