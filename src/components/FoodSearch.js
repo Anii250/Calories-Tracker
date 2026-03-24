@@ -98,8 +98,8 @@ function handleFoodSearch(query) {
         <div class="food-search__empty" style="padding: 24px; text-align: center;">
           <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
           <h4 style="margin-bottom: 8px;">API Key Required</h4>
-          <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 16px;">
-            To search CalorieNinjas, please configure your free API Key in Settings.
+          <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px;">
+            Get your free key at <a href="https://calorieninjas.com/api" target="_blank" style="color:var(--accent)">calorieninjas.com</a> and add it in Settings.
           </p>
           <button class="btn btn-primary" onclick="Router.navigate('settings')" style="padding: 8px 16px; font-size: 14px;">Go to Settings</button>
         </div>
@@ -110,21 +110,38 @@ function handleFoodSearch(query) {
     container.innerHTML = `
       <div class="food-search__loading">
         <div class="food-search__spinner"></div>
-        <span>Searching online...</span>
+        <span>Searching CalorieNinjas...</span>
       </div>`;
 
     searchTimeout = setTimeout(async () => {
       try {
         const results = await NutritionAPI.searchFood(query);
-        if (results.length === 0) {
-          container.innerHTML = '<div class="food-search__empty">No results found. Try a different query.</div>';
-        } else {
-          renderFoodResults(results, container, '🌐');
-        }
+        renderFoodCards(results, container);
       } catch (e) {
-        container.innerHTML = '<div class="food-search__empty">Network error. Check your connection.</div>';
+        let icon = '⚠️', title = 'Something went wrong', desc = 'Please try again later.';
+
+        if (e.message === 'INVALID_KEY') {
+          icon = '🔑'; title = 'Invalid API Key';
+          desc = 'Your CalorieNinjas API key is invalid. Please update it in Settings.';
+        } else if (e.message === 'NO_RESULTS') {
+          icon = '🔍'; title = 'No results found';
+          desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
+        } else if (e.message === 'TIMEOUT') {
+          icon = '⏳'; title = 'Request timed out';
+          desc = 'The server took too long. Check your connection and try again.';
+        } else if (e.message === 'NETWORK_ERROR') {
+          icon = '📡'; title = 'Network error';
+          desc = 'Check your internet connection and try again.';
+        }
+
+        container.innerHTML = `
+          <div class="food-search__empty">
+            <div style="font-size:1.8rem;margin-bottom:6px;">${icon}</div>
+            <div><strong>${title}</strong></div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
+          </div>`;
       }
-    }, 500);
+    }, 400);
   }
 }
 
