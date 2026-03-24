@@ -502,6 +502,14 @@ const Store = (() => {
     syncToCloud();
   };
 
+  // ---- BMI Calculator ----
+  function getBMI() {
+    const data = load();
+    const h = (data.profile.height || 167) / 100; // cm to m
+    const w = data.profile.weight || 70;
+    return w / (h * h);
+  }
+
   initTheme();
 
   return {
@@ -516,6 +524,7 @@ const Store = (() => {
     exportCSV, searchFood, getFoodDatabase,
     getDarkMode, setDarkMode, initTheme,
     getApiKey, setApiKey,
+    getBMI,
     mergeCloudData, syncToCloud
   };
 })();

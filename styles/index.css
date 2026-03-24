@@ -2413,3 +2413,213 @@ body,
   color: white;
   box-shadow: 0 4px 16px rgba(46, 125, 50, .4);
 }
+
+/* ---------- BMI Card ---------- */
+.bmi-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn .3s ease;
+}
+
+.bmi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.bmi-card__title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bmi-card__value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.bmi-card__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: .78rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.bmi-card__category--underweight {
+  background: rgba(33, 150, 243, .12);
+  color: #1976d2;
+}
+
+.bmi-card__category--normal {
+  background: rgba(67, 160, 71, .12);
+  color: #2e7d32;
+}
+
+.bmi-card__category--overweight {
+  background: rgba(255, 152, 0, .12);
+  color: #e65100;
+}
+
+.bmi-card__category--obese {
+  background: rgba(244, 67, 54, .12);
+  color: #c62828;
+}
+
+/* Gauge */
+.bmi-gauge {
+  margin-bottom: 14px;
+}
+
+.bmi-gauge__bar {
+  position: relative;
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: visible;
+  margin-bottom: 6px;
+}
+
+.bmi-gauge__zone {
+  height: 100%;
+}
+
+.bmi-gauge__zone--underweight {
+  flex: 3.5;  /* 15–18.5 */
+  background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 100%);
+  border-radius: 5px 0 0 5px;
+}
+
+.bmi-gauge__zone--normal {
+  flex: 6.5;  /* 18.5–25 */
+  background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+}
+
+.bmi-gauge__zone--overweight {
+  flex: 5;    /* 25–30 */
+  background: linear-gradient(90deg, #ffa726 0%, #fb8c00 100%);
+}
+
+.bmi-gauge__zone--obese {
+  flex: 10;   /* 30–40 */
+  background: linear-gradient(90deg, #ef5350 0%, #c62828 100%);
+  border-radius: 0 5px 5px 0;
+}
+
+.bmi-gauge__marker {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 18px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+  transition: left .5s ease;
+}
+
+.bmi-gauge__marker::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--text-primary);
+}
+
+.bmi-gauge__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: .6rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 0 1px;
+}
+
+/* Info Row */
+.bmi-card__info {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 10px;
+}
+
+.bmi-card__info-item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bmi-card__info-value {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bmi-card__info-label {
+  font-size: .65rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* Tip */
+.bmi-card__tip {
+  font-size: .75rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* Dark mode — BMI card */
+[data-theme="dark"] .bmi-card {
+  background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}
+
+[data-theme="dark"] .bmi-card__category--underweight {
+  background: rgba(33, 150, 243, .15);
+  color: #64b5f6;
+}
+
+[data-theme="dark"] .bmi-card__category--normal {
+  background: rgba(67, 160, 71, .15);
+  color: #81c784;
+}
+
+[data-theme="dark"] .bmi-card__category--overweight {
+  background: rgba(255, 152, 0, .15);
+  color: #ffb74d;
+}
+
+[data-theme="dark"] .bmi-card__category--obese {
+  background: rgba(244, 67, 54, .15);
+  color: #ef5350;
+}
+
+[data-theme="dark"] .bmi-gauge__marker {
+  background: #e8e8e8;
+}
+
+[data-theme="dark"] .bmi-gauge__marker::after {
+  border-top-color: #e8e8e8;
+}
+
+[data-theme="dark"] .bmi-card__info {
+  border-color: #333;
+}
