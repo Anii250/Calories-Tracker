@@ -230,18 +230,11 @@ function StepsTracker() {
         </div>
 
         <!-- Controls -->
-        <div class="steps-tracker__controls">
-          <div class="steps-tracker__inc-row">
-            <button class="steps-tracker__btn steps-tracker__btn--minus" onclick="updateStepsBy(-500)" title="−500">−500</button>
-            <button class="steps-tracker__btn steps-tracker__btn--plus" onclick="updateStepsBy(500)" title="+500">+500</button>
-            <button class="steps-tracker__btn steps-tracker__btn--plus-lg" onclick="updateStepsBy(1000)" title="+1000">+1k</button>
-          </div>
-          <div class="steps-tracker__quick">
-            <button class="steps-tracker__chip" onclick="quickSetSteps(1000)">1,000</button>
-            <button class="steps-tracker__chip" onclick="quickSetSteps(2000)">2,000</button>
-            <button class="steps-tracker__chip" onclick="quickSetSteps(5000)">5,000</button>
-            <button class="steps-tracker__chip" onclick="quickSetSteps(10000)">10,000</button>
-          </div>
+        <div class="steps-tracker__controls" style="display:flex;gap:8px;margin-top:16px;width:100%;">
+          <input type="number" id="manual-steps-input" class="steps-tracker__input" placeholder="e.g. 500" 
+            style="flex:1;padding:10px 14px;border-radius:12px;border:none;background:rgba(128,128,128,0.15);color:var(--text);font-size:1rem;outline:none;" />
+          <button class="steps-tracker__btn" onclick="addManualSteps()" 
+            style="padding:10px 20px;border-radius:12px;background:var(--accent);color:#fff;border:none;font-weight:600;cursor:pointer;font-size:1rem;">Add</button>
         </div>
       </div>
 
@@ -294,10 +287,15 @@ function updateStepsBy(amount) {
     reRenderSteps();
 }
 
-function quickSetSteps(count) {
-    Store.setSteps(count);
-    reRenderSteps();
+function addManualSteps() {
+    const input = document.getElementById('manual-steps-input');
+    if (!input || !input.value) return;
+    const amount = parseInt(input.value, 10);
+    if (!isNaN(amount) && amount !== 0) {
+        updateStepsBy(amount);
+    }
 }
+
 
 function reRenderSteps() {
     const container = document.getElementById('steps-section');
