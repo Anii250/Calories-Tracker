@@ -462,7 +462,7 @@ const Store = (() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }
 
-  // ---- API Key ----
+  // ---- API Keys ----
   function getApiKey() {
     return localStorage.getItem('calorieai_apikey') || 'SrCMtDwN3/ZkYwBRMQY87w==Q5S01WmpQYzieSR9';
   }
@@ -472,6 +472,18 @@ const Store = (() => {
       localStorage.setItem('calorieai_apikey', key.trim());
     } else {
       localStorage.removeItem('calorieai_apikey');
+    }
+  }
+
+  function getGeminiApiKey() {
+    return localStorage.getItem('calorieai_gemini_apikey') || '';
+  }
+
+  function setGeminiApiKey(key) {
+    if (key) {
+      localStorage.setItem('calorieai_gemini_apikey', key.trim());
+    } else {
+      localStorage.removeItem('calorieai_gemini_apikey');
     }
   }
 
@@ -524,6 +536,7 @@ const Store = (() => {
     exportCSV, searchFood, getFoodDatabase,
     getDarkMode, setDarkMode, initTheme,
     getApiKey, setApiKey,
+    getGeminiApiKey, setGeminiApiKey,
     getBMI,
     mergeCloudData, syncToCloud
   };

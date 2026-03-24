@@ -2,37 +2,39 @@
    CalorieAI — Service Worker (offline caching)
    ============================================================ */
 
-const CACHE_NAME = 'calorieai-v11';
+const CACHE_NAME = 'calorieai-v12';
 
 const PRECACHE_URLS = [
     './',
     './index.html',
     './manifest.json',
     './styles/index.css',
-    './src/firebase-config.js',
-    './src/nutrition-api.js?v=6',
-    './src/store.js',
-    './src/main.js',
-    './src/components/ProgressRing.js',
-    './src/components/MacroBar.js',
-    './src/components/MealCard.js',
-    './src/components/NavBar.js',
-    './src/components/NumberPicker.js',
-    './src/components/AchievementModal.js',
-    './src/components/WaterTracker.js',
-    './src/components/StepsTracker.js',
-    './src/components/BMICard.js',
-    './src/components/StreakCounter.js',
-    './src/components/FoodSearch.js',
-    './src/components/CameraCapture.js',
-    './src/components/MealReminders.js',
-    './src/components/ExportData.js',
-    './src/pages/AuthPage.js',
-    './src/pages/FoodDiary.js',
-    './src/pages/Charts.js',
-    './src/pages/Scanner.js?v=6',
-    './src/pages/Settings.js',
-    './src/pages/Onboarding.js'
+    './icons/icon-192.png',
+    './icons/icon-512.png',
+    './src/firebase-config.js?v=8',
+    './src/nutrition-api.js?v=8',
+    './src/store.js?v=8',
+    './src/main.js?v=8',
+    './src/components/ProgressRing.js?v=8',
+    './src/components/MacroBar.js?v=8',
+    './src/components/MealCard.js?v=8',
+    './src/components/NavBar.js?v=8',
+    './src/components/NumberPicker.js?v=8',
+    './src/components/AchievementModal.js?v=8',
+    './src/components/WaterTracker.js?v=9',
+    './src/components/StepsTracker.js?v=9',
+    './src/components/BMICard.js?v=9',
+    './src/components/StreakCounter.js?v=8',
+    './src/components/FoodSearch.js?v=8',
+    './src/components/CameraCapture.js?v=8',
+    './src/components/MealReminders.js?v=8',
+    './src/components/ExportData.js?v=8',
+    './src/pages/AuthPage.js?v=8',
+    './src/pages/FoodDiary.js?v=8',
+    './src/pages/Charts.js?v=8',
+    './src/pages/Scanner.js?v=8',
+    './src/pages/Settings.js?v=8',
+    './src/pages/Onboarding.js?v=8'
 ];
 
 self.addEventListener('install', (event) => {

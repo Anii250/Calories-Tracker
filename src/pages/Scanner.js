@@ -74,10 +74,11 @@ async function processScannedImage() {
     const base64Data = imgEl.src.split(',')[1];
     
     // Check if user has entered an API key in Settings
-    const apiKey = typeof Store !== 'undefined' ? Store.getApiKey() : '';
+    const apiKey = typeof Store !== 'undefined' ? Store.getGeminiApiKey() : '';
     if (!apiKey) {
       alert("Please enter your Gemini API Key in the Settings page first!");
       document.getElementById('scanner-loader').style.display = 'none';
+      Router.navigate('settings');
       return;
     }
     

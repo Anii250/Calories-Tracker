@@ -129,13 +129,24 @@ function SettingsPage() {
 
       <!-- API Key Settings -->
       <div class="settings-section">
-        <div class="settings-section__title">Real-Time API Settings</div>
+        <div class="settings-section__title">CalorieNinjas API (Text Search)</div>
         <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px; line-height: 1.4;">
-          For accurate, real-time food tracking, enter a free CalorieNinjas API key. Get one at <a href="https://calorieninjas.com/api" target="_blank" style="color: var(--accent); text-decoration: underline;">calorieninjas.com</a>.
+          For accurate text-based food search. Get your free key at <a href="https://calorieninjas.com/api" target="_blank" style="color: var(--accent); text-decoration: underline;">calorieninjas.com</a>.
         </p>
         <div style="display: flex; gap: 8px;">
-          <input type="password" id="api-key-input" placeholder="Enter API Key here" value="${Store.getApiKey()}" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color);" />
+          <input type="password" id="api-key-input" placeholder="Enter CalorieNinjas Key" value="${Store.getApiKey()}" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color);" />
           <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section__title">Gemini AI API (Camera Scanner)</div>
+        <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px; line-height: 1.4;">
+          Power the camera scanner with Google Gemini AI. Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--accent); text-decoration: underline;">aistudio.google.com</a>.
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <input type="password" id="gemini-api-key-input" placeholder="Enter Gemini API Key" value="${Store.getGeminiApiKey()}" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color);" />
+          <button class="btn btn-primary" onclick="saveGeminiApiKey()">Save</button>
         </div>
       </div>
 
@@ -164,7 +175,14 @@ function saveApiKey() {
   const input = document.getElementById('api-key-input');
   if (input) {
     Store.setApiKey(input.value);
-    alert('API Key saved successfully!');
+    alert('CalorieNinjas API Key saved!');
+  }
+}
+function saveGeminiApiKey() {
+  const input = document.getElementById('gemini-api-key-input');
+  if (input) {
+    Store.setGeminiApiKey(input.value);
+    alert('Gemini API Key saved!');
   }
 }
 function setStepsGoal(val) {
