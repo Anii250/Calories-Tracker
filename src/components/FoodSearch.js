@@ -56,16 +56,7 @@ async function handleFoodSearch(query) {
   const trimmedQuery = query ? query.trim() : '';
 
   if (!trimmedQuery || trimmedQuery.length < 3) {
-    if (trimmedQuery.length > 0) {
-      container.innerHTML = `
-        <div class="food-search__empty">
-          <div style="font-size:1.8rem;margin-bottom:6px;">⌨️</div>
-          <div><strong>Keep typing...</strong></div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Please enter at least 3 characters</div>
-        </div>`;
-    } else {
-      container.innerHTML = '';
-    }
+    container.innerHTML = '';
     return;
   }
 
@@ -110,7 +101,7 @@ async function handleFoodSearch(query) {
         icon = '🔑'; title = 'Invalid API Key';
         desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
       } else if (e.message === 'NO_RESULTS') {
-        icon = '🔍'; title = 'No food found';
+        icon = '🔍'; title = 'No results found';
         desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
       } else if (e.message === 'TIMEOUT') {
         icon = '⏳'; title = 'Request timed out';
