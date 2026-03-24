@@ -53,15 +53,24 @@ async function handleFoodSearch(query) {
   if (searchTimeout) clearTimeout(searchTimeout); // Cancel any pending debounce if called directly (e.g. via Enter key)
 
   const container = document.getElementById('food-search-results');
-  if (!container) return;
+  const trimmedQuery = query ? query.trim() : '';
 
-  if (!query || query.trim().length < 2) {
-    container.innerHTML = '';
+  if (!trimmedQuery || trimmedQuery.length < 3) {
+    if (trimmedQuery.length > 0) {
+      container.innerHTML = `
+        <div class="food-search__empty">
+          <div style="font-size:1.8rem;margin-bottom:6px;">⌨️</div>
+          <div><strong>Keep typing...</strong></div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Please enter at least 3 characters</div>
+        </div>`;
+    } else {
+      container.innerHTML = '';
+    }
     return;
   }
 
   if (currentFoodTab === 'local') {
-    const results = Store.searchFood(query);
+    const results = Store.searchFood(trimmedQuery);
     renderFoodResults(results, container, '📦');
   } else {
     // CalorieNinjas API
@@ -92,7 +101,7 @@ async function handleFoodSearch(query) {
     if (searchInput) searchInput.disabled = true;
 
     try {
-      const results = await NutritionAPI.searchFood(query);
+      const results = await NutritionAPI.searchFood(trimmedQuery);
       renderFoodCards(results, container);
     } catch (e) {
       let icon = '⚠️', title = 'Something went wrong', desc = 'Please try again later.';
