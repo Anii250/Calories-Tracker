@@ -145,19 +145,39 @@ const Pedometer = (() => {
         return isTracking;
     }
 
-    // Auto-resume tracking if it was active before page refresh
-    function autoResume() {
-        if (localStorage.getItem('calorieai_pedometer_active') === 'true' && isSupported()) {
-            start();
-        }
+    // Auto-start tracking on page load
+    function autoStart() {
+        if (!isSupported()) return;
+
+        // Check if user explicitly stopped tracking
+        if (localStorage.getItem('calorieai_pedometer_active') === 'false') return;
+
+        // Try to start directly (works on Android/desktop)
+        // On iOS, requestPermission requires a user gesture — handled below
+        start().catch(() => {});
     }
 
-    return { start, stop, isTracking: getIsTracking, isSupported, autoResume };
+    return { start, stop, isTracking: getIsTracking, isSupported, autoStart };
 })();
 
-// Auto-resume on page load
+// Auto-start on page load
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => Pedometer.autoResume(), 1500);
+    setTimeout(() => Pedometer.autoStart(), 1500);
+
+    // iOS fallback: if auto-start failed due to gesture requirement,
+    // start on first user tap anywhere in the app
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function') {
+        const iosAutoStart = () => {
+            if (!Pedometer.isTracking() && localStorage.getItem('calorieai_pedometer_active') !== 'false') {
+                Pedometer.start();
+            }
+            document.removeEventListener('touchstart', iosAutoStart);
+            document.removeEventListener('click', iosAutoStart);
+        };
+        document.addEventListener('touchstart', iosAutoStart, { once: true });
+        document.addEventListener('click', iosAutoStart, { once: true });
+    }
 });
 
 
