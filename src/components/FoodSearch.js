@@ -95,11 +95,15 @@ async function handleFoodSearch(query) {
       const results = await NutritionAPI.searchFood(trimmedQuery);
       renderFoodCards(results, container);
     } catch (e) {
-      let icon = '⚠️', title = 'Something went wrong', desc = 'Please try again later.';
+      console.error("FoodSearch API Error:", e);
+      let icon = '⚠️', title = 'Something went wrong', desc = 'The server returned an unexpected error.';
 
       if (e.message === 'INVALID_KEY') {
         icon = '🔑'; title = 'Invalid API Key';
         desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
+      } else if (e.message === 'API_ERROR') {
+        icon = '❌'; title = 'API Server Error';
+        desc = 'CalorieNinjas rejected the request. You may have hit a rate limit or a temporary server error.';
       } else if (e.message === 'NO_RESULTS') {
         icon = '🔍'; title = 'No results found';
         desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
