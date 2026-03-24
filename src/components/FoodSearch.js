@@ -1,5 +1,5 @@
 /* ============================================================
-   FoodSearch Component — searchable food database + Live API
+   FoodSearch Component — searchable food database + CalorieNinjas API
    ============================================================ */
 
 let searchTimeout = null;
@@ -13,7 +13,7 @@ function FoodSearch(mealType) {
           type="text"
           class="food-search__input"
           id="food-search-input"
-          placeholder="Search foods (e.g. chicken, rice, banana...)"
+          placeholder="Search foods (e.g. 2 eggs, 1 cup rice...)"
           oninput="handleFoodSearch(this.value)"
           onkeydown="if(event.key==='Enter'){event.preventDefault();handleFoodSearch(this.value);}"
           autocomplete="off"
@@ -24,8 +24,7 @@ function FoodSearch(mealType) {
       </div>
       <div class="food-search__tabs">
         <button class="food-search__tab active" id="fs-tab-local" onclick="switchFoodTab('local')">📦 Local</button>
-        <button class="food-search__tab" id="fs-tab-off" onclick="switchFoodTab('off')">🌍 Open Food Facts</button>
-        <button class="food-search__tab" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 CalorieNinjas</button>
+        <button class="food-search__tab" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 Online</button>
       </div>
       <div class="food-search__results" id="food-search-results"></div>
     </div>
@@ -37,7 +36,6 @@ let currentFoodTab = 'local';
 function switchFoodTab(tab) {
   currentFoodTab = tab;
   document.getElementById('fs-tab-local')?.classList.toggle('active', tab === 'local');
-  document.getElementById('fs-tab-off')?.classList.toggle('active', tab === 'off');
   document.getElementById('fs-tab-online')?.classList.toggle('active', tab === 'online');
 
   const query = document.getElementById('food-search-input')?.value || '';
@@ -56,50 +54,17 @@ function handleFoodSearch(query) {
   }
 
   if (currentFoodTab === 'local') {
-    // Search local database
     const results = Store.searchFood(query);
     renderFoodResults(results, container, '📦');
-
-  } else if (currentFoodTab === 'off') {
-    // Open Food Facts — no API key needed
-    container.innerHTML = `
-      <div class="food-search__loading">
-        <div class="food-search__spinner"></div>
-        <span>Searching Open Food Facts...</span>
-      </div>`;
-
-    searchTimeout = setTimeout(async () => {
-      try {
-        const results = await searchOpenFoodFacts(query);
-        if (results.length === 0) {
-          container.innerHTML = `
-            <div class="food-search__empty">
-              <div style="font-size:1.8rem;margin-bottom:6px;">🔍</div>
-              <div>No results found for "<strong>${escapeHtml(query)}</strong>"</div>
-              <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Try a different food name</div>
-            </div>`;
-        } else {
-          renderFoodCards(results, container);
-        }
-      } catch (e) {
-        container.innerHTML = `
-          <div class="food-search__empty">
-            <div style="font-size:1.8rem;margin-bottom:6px;">⚠️</div>
-            <div>Failed to fetch data</div>
-            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">Check your internet connection and try again</div>
-          </div>`;
-      }
-    }, 400);
-
   } else {
-    // CalorieNinjas online - require API key
+    // CalorieNinjas API
     if (!Store.getApiKey()) {
       container.innerHTML = `
         <div class="food-search__empty" style="padding: 24px; text-align: center;">
           <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
           <h4 style="margin-bottom: 8px;">API Key Required</h4>
           <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px;">
-            Get your free key at <a href="https://calorieninjas.com/api" target="_blank" style="color:var(--accent)">calorieninjas.com</a> and add it in Settings.
+            Get your free key at <a href="https://calorieninjas.com/api" target="_blank" style="color:var(--accent)">calorieninjas.com/api</a> and add it in Settings.
           </p>
           <button class="btn btn-primary" onclick="Router.navigate('settings')" style="padding: 8px 16px; font-size: 14px;">Go to Settings</button>
         </div>
@@ -122,7 +87,7 @@ function handleFoodSearch(query) {
 
         if (e.message === 'INVALID_KEY') {
           icon = '🔑'; title = 'Invalid API Key';
-          desc = 'Your CalorieNinjas API key is invalid. Please update it in Settings.';
+          desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
         } else if (e.message === 'NO_RESULTS') {
           icon = '🔍'; title = 'No results found';
           desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
@@ -145,60 +110,16 @@ function handleFoodSearch(query) {
   }
 }
 
-/* ---- Open Food Facts API ---- */
-async function searchOpenFoodFacts(query) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=20&fields=product_name,product_name_en,nutriments,brands,image_small_url,quantity`;
-
-  const res = await fetch(url, { signal: controller.signal });
-  clearTimeout(timeoutId);
-
-  if (!res.ok) throw new Error('API request failed');
-
-  const data = await res.json();
-  return (data.products || [])
-    .filter(p => {
-      const name = p.product_name_en || p.product_name || '';
-      if (!name || name.length < 2) return false;
-      if (!p.nutriments) return false;
-      // Must have at least calories data
-      const cal = p.nutriments['energy-kcal_100g'] || p.nutriments['energy-kcal'] || 0;
-      if (cal === 0) return false;
-      // Skip mostly non-ASCII names
-      const nonAscii = (name.match(/[^\x00-\x7F]/g) || []).length / name.length;
-      if (nonAscii > 0.3) return false;
-      return true;
-    })
-    .map(p => ({
-      name: (p.product_name_en || p.product_name).trim(),
-      brand: p.brands || '',
-      calories: Math.round(p.nutriments['energy-kcal_100g'] || p.nutriments['energy-kcal'] || 0),
-      proteins: +(p.nutriments.proteins_100g || 0).toFixed(1),
-      fats: +(p.nutriments.fat_100g || 0).toFixed(1),
-      carbs: +(p.nutriments.carbohydrates_100g || 0).toFixed(1),
-      fiber: +(p.nutriments.fiber_100g || 0).toFixed(1),
-      sugar: +(p.nutriments.sugars_100g || 0).toFixed(1),
-      image: p.image_small_url || '',
-      quantity: p.quantity || 'per 100g',
-      source: 'openfoodfacts'
-    }))
-    .slice(0, 5);
-}
-
-/* ---- Render: Card format for Open Food Facts ---- */
+/* ---- Render: Card format ---- */
 function renderFoodCards(results, container) {
   container.innerHTML = `
     <div class="food-search__cards">
       ${results.map((food, i) => `
         <div class="food-result-card" id="food-result-${i}">
           <div class="food-result-card__top">
-            ${food.image ? `<img class="food-result-card__img" src="${food.image}" alt="" onerror="this.style.display='none'" />` : ''}
             <div class="food-result-card__info">
               <div class="food-result-card__name">${escapeHtml(food.name)}</div>
-              ${food.brand ? `<div class="food-result-card__brand">${escapeHtml(food.brand)}</div>` : ''}
-              <div class="food-result-card__qty">${escapeHtml(food.quantity)}</div>
+              <div class="food-result-card__qty">${escapeHtml(food.serving)}</div>
             </div>
             <div class="food-result-card__cal">${food.calories}<small> kcal</small></div>
           </div>
@@ -249,15 +170,12 @@ function useFoodResult(name, cal, protein, fats, carbs) {
   if (fatsEl) fatsEl.value = fats;
   if (carbsEl) carbsEl.value = carbs;
 
-  // Scroll to the form
   nameEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-  // Flash highlight on the form
   nameEl?.style.setProperty('border-color', 'var(--accent)');
   setTimeout(() => nameEl?.style.removeProperty('border-color'), 2000);
 }
 
-/* ---- Render: List format (existing style) ---- */
+/* ---- Render: List format (local results) ---- */
 function renderFoodResults(results, container, sourceIcon) {
   if (results.length === 0) {
     container.innerHTML = '<div class="food-search__empty">No foods found. Try another search.</div>';
