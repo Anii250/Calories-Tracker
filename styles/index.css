@@ -2868,6 +2868,36 @@ body,
   border-top-color: #66bb6a;
 }
 
+/* ---- Floating Action Button ---- */
+.fab {
+  position: fixed;
+  bottom: 80px; /* Sits above the 60px nav bar + 20px padding */
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent); /* the green brand color */
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(67, 160, 71, 0.4);
+  cursor: pointer;
+  z-index: 1000; /* Float above everything */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fab:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+}
+
+[data-theme="dark"] .fab {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+
 [data-theme="dark"] .food-result-card__img {
   background: #2c2c2c;
 }
