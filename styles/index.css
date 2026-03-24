@@ -1452,7 +1452,7 @@ body,
 
 .food-search__input {
   width: 100%;
-  padding: 12px 14px 12px 40px;
+  padding: 12px 48px 12px 46px; /* Right padding mapped for the search btn, Left padding mapped for the magnifying icon */
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: .9rem;
