@@ -108,12 +108,12 @@ function FoodDiaryPage() {
 
 
       <!-- Date Row -->
-      <div class="date-row">
-        <div class="date-row__left">
-          <h2>Today:</h2>
-          <span>${dateStr}</span>
+      <div class="date-row" style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0;">
+        <div class="date-row__left" style="display: flex; align-items: baseline; gap: 8px;">
+          <h2 style="margin: 0; font-size: 1.4rem;">Today:</h2>
+          <span style="color: var(--text-muted); font-size: 0.95rem;">${dateStr}</span>
         </div>
-        <button class="page-header__icon" onclick="openDatePicker()" style="background:rgba(255,255,255,0.08);border-radius:12px;" title="View past days">
+        <button class="page-header__icon" onclick="openDatePicker()" style="background:rgba(255,255,255,0.08);border-radius:12px;margin:0;display:flex;align-items:center;justify-content:center;" title="View past days">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </button>
       </div>
