@@ -2,7 +2,7 @@
    CalorieAI — Service Worker (offline caching)
    ============================================================ */
 
-const CACHE_NAME = 'calorieai-v8';
+const CACHE_NAME = 'calorieai-v9';
 
 const PRECACHE_URLS = [
     './',
@@ -20,6 +20,8 @@ const PRECACHE_URLS = [
     './src/components/NumberPicker.js',
     './src/components/AchievementModal.js',
     './src/components/WaterTracker.js',
+    './src/components/StepsTracker.js',
+    './src/components/BMICard.js',
     './src/components/StreakCounter.js',
     './src/components/FoodSearch.js',
     './src/components/CameraCapture.js',
