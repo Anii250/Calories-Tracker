@@ -73,9 +73,16 @@ async function processScannedImage() {
     // Extract base64 payload from data URL
     const base64Data = imgEl.src.split(',')[1];
     
+    // Check if user has entered an API key in Settings
+    const apiKey = typeof Store !== 'undefined' ? Store.getApiKey() : '';
+    if (!apiKey) {
+      alert("Please enter your Gemini API Key in the Settings page first!");
+      document.getElementById('scanner-loader').style.display = 'none';
+      return;
+    }
+    
     // Gemini API Request
-    const apiKey = 'AIzaSyApw63E-fVpG6Cn2v2PpkM_vgiMzcUhBTg';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const requestBody = {
       contents: [
