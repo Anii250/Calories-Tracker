@@ -2,7 +2,7 @@
    CalorieAI — Service Worker (offline caching)
    ============================================================ */
 
-const CACHE_NAME = 'calorieai-v9';
+const CACHE_NAME = 'calorieai-v10';
 
 const PRECACHE_URLS = [
     './',
