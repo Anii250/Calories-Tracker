@@ -148,7 +148,7 @@ function renderScannerResult() {
   document.getElementById('scanner-alert').style.display = 'block';
   document.getElementById('btn-add-scanned').style.display = ''; // Ensure button is visible
 
-  const srcString = currentScannedFood.source === 'calorieninjas' ? 'CalorieNinjas API' : 'OpenFoodFacts API';
+  const srcString = 'CalorieNinjas API';
   document.getElementById('scanner-source').textContent = `Real nutrition data fetched from ${srcString}.`;
 
   document.getElementById('scanner-name').textContent = currentScannedFood.name.charAt(0).toUpperCase() + currentScannedFood.name.slice(1);
