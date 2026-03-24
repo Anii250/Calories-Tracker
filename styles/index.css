@@ -1368,15 +1368,15 @@ body,
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--gray-200);
-  background: var(--bg-primary);
+  border: 1.5px solid var(--gray-300);
+  background: var(--gray-50);
   font-size: 1.1rem;
   cursor: pointer;
   transition: all var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .water-glass.filled {
@@ -1386,9 +1386,16 @@ body,
   transform: scale(1.05);
 }
 
+[data-theme="dark"] .water-glass {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  opacity: 0.8;
+}
+
 [data-theme="dark"] .water-glass.filled {
   background: #0d2137;
   border-color: #0288d1;
+  opacity: 1;
 }
 
 .water-tracker__bar {
