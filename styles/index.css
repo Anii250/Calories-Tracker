@@ -2623,3 +2623,248 @@ body,
 [data-theme="dark"] .bmi-card__info {
   border-color: #333;
 }
+
+/* ---------- Food Search Enhancements ---------- */
+
+/* Search button in input */
+.food-search__search-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.food-search__search-btn:hover {
+  background: #2e7d32;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.food-search__input-wrap {
+  position: relative;
+}
+
+/* Loading indicator */
+.food-search__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: .85rem;
+}
+
+.food-search__spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: fsSpinner .7s linear infinite;
+}
+
+@keyframes fsSpinner {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Food Result Cards --- */
+.food-search__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.food-result-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  padding: 14px;
+  transition: all var(--transition);
+  animation: fadeIn .25s ease;
+}
+
+.food-result-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px rgba(67, 160, 71, .12);
+}
+
+.food-result-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.food-result-card__img {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--gray-100);
+}
+
+.food-result-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-result-card__name {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.food-result-card__brand {
+  font-size: .72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.food-result-card__qty {
+  font-size: .68rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.food-result-card__cal {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.food-result-card__cal small {
+  font-size: .6rem;
+  font-weight: 600;
+}
+
+/* Macros row */
+.food-result-card__macros {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.food-result-card__macro {
+  flex: 1;
+  text-align: center;
+  padding: 6px 4px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+}
+
+.food-result-card__macro-val {
+  display: block;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.food-result-card__macro-lbl {
+  display: block;
+  font-size: .6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  margin-top: 1px;
+}
+
+/* Action buttons */
+.food-result-card__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.food-result-card__use-btn,
+.food-result-card__add-btn {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: var(--radius-full);
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+}
+
+.food-result-card__use-btn {
+  background: rgba(67, 160, 71, .1);
+  color: #2e7d32;
+  border-color: rgba(67, 160, 71, .25);
+}
+
+.food-result-card__use-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.food-result-card__add-btn {
+  background: var(--gray-100);
+  color: var(--text-secondary);
+  border-color: var(--gray-200);
+}
+
+.food-result-card__add-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* --- Dark mode: Food Search --- */
+[data-theme="dark"] .food-result-card {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+[data-theme="dark"] .food-result-card:hover {
+  border-color: #43a047;
+  box-shadow: 0 2px 12px rgba(67, 160, 71, .15);
+}
+
+[data-theme="dark"] .food-result-card__macro {
+  background: #2c2c2c;
+}
+
+[data-theme="dark"] .food-result-card__use-btn {
+  background: rgba(67, 160, 71, .12);
+  color: #81c784;
+  border-color: rgba(67, 160, 71, .3);
+}
+
+[data-theme="dark"] .food-result-card__add-btn {
+  background: #2c2c2c;
+  color: #aaa;
+  border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .food-search__spinner {
+  border-color: #333;
+  border-top-color: #66bb6a;
+}
+
+[data-theme="dark"] .food-result-card__img {
+  background: #2c2c2c;
+}
+
+[data-theme="dark"] .food-search__search-btn {
+  background: #43a047;
+}
