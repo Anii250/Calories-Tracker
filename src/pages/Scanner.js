@@ -65,61 +65,70 @@ async function processScannedImage() {
   document.getElementById('scanner-loader').style.display = 'block';
   document.getElementById('scanner-result').style.display = 'none';
 
-  let recognizedName = 'Apple'; // Fallback if AI fails
+  document.querySelector('#scanner-loader h3').textContent = 'Analyzing Food...';
+  document.querySelector('#scanner-loader .text-muted').textContent = 'Using Google Gemini AI...';
 
   try {
-    // 1. Load TensorFlow.js & MobileNet dynamically if needed
-    if (!window.mobilenetModel) {
-      document.querySelector('#scanner-loader h3').textContent = 'Loading AI Model...';
-      document.querySelector('#scanner-loader .text-muted').textContent = 'First time takes a few seconds';
-
-      if (typeof mobilenet === 'undefined') {
-        await new Promise((resolve, reject) => {
-          const script1 = document.createElement('script');
-          script1.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
-          script1.onload = () => {
-            const script2 = document.createElement('script');
-            script2.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest';
-            script2.onload = resolve;
-            script2.onerror = reject;
-            document.head.appendChild(script2);
-          };
-          script1.onerror = reject;
-          document.head.appendChild(script1);
-        });
-      }
-      
-      window.mobilenetModel = await mobilenet.load({ version: 2, alpha: 1.0 });
-    }
-
-    document.querySelector('#scanner-loader h3').textContent = 'Analyzing Food...';
-    document.querySelector('#scanner-loader .text-muted').textContent = 'Using computer vision & Nutrition API';
-
-    // 2. Classify the image using the camera preview element
     const imgEl = document.getElementById('camera-preview');
-    const predictions = await window.mobilenetModel.classify(imgEl);
-    console.log("AI Predictions:", predictions);
+    // Extract base64 payload from data URL
+    const base64Data = imgEl.src.split(',')[1];
+    
+    // Gemini API Request
+    const apiKey = 'AIzaSyApw63E-fVpG6Cn2v2PpkM_vgiMzcUhBTg';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\${apiKey}`;
+    
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: 'Analyze this image. Identify the primary food item. Respond ONLY with a valid, raw JSON object (no markdown, no backticks) containing exactly these keys: "foodName" (string), "calories" (number), "protein" (number), "carbs" (number), "fats" (number).' },
+            {
+              inline_data: {
+                mime_type: "image/jpeg",
+                data: base64Data
+              }
+            }
+          ]
+        }
+      ]
+    };
 
-    if (predictions && predictions.length > 0) {
-      // e.g. "Granny Smith, apple" -> "apple"
-      // e.g. "cheeseburger, hamburger, burger" -> "cheeseburger"
-      recognizedName = predictions[0].className.split(',')[0].trim();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini API Error: ${response.status}`);
     }
 
-    // 3. Fetch REAL nutrition data from API based on the recognized food
-    const results = await NutritionAPI.searchFood(recognizedName);
+    const data = await response.json();
+    const responseText = data.candidates[0].content.parts[0].text.trim();
+    
+    // Strip possible markdown ticks just in case the AI ignores the strict prompt
+    const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const parsedData = JSON.parse(cleanJson);
 
     document.getElementById('scanner-loader').style.display = 'none';
 
-    if (results && results.length > 0) {
-      currentScannedFood = results[0]; // Take top result
-      currentScannedFood.name = recognizedName; // Use the AI's short name
-      scannerQty = 1;
-      renderScannerResult();
-    } else {
-      showScannerError(recognizedName);
-    }
+    currentScannedFood = {
+      name: parsedData.foodName || 'Unknown Food',
+      calories: parsedData.calories || 0,
+      proteins: parsedData.protein || 0,
+      fats: parsedData.fats || 0,
+      carbs: parsedData.carbs || 0,
+      fiber: 0,
+      sugar: 0,
+      serving: 'Estimated by Gemini AI',
+      source: 'gemini'
+    };
+    
+    scannerQty = 1;
+    renderScannerResult();
+
   } catch (err) {
+    console.error('Gemini Scanner Error:', err);
     document.getElementById('scanner-loader').style.display = 'none';
     showScannerError(null);
   }
@@ -132,10 +141,8 @@ function showScannerError(recognizedName) {
   const resultEl = document.getElementById('scanner-result');
   resultEl.style.display = 'block';
   document.getElementById('scanner-alert').style.display = 'block';
-  document.getElementById('scanner-source').textContent = recognizedName
-    ? `Detected "${recognizedName}" but could not find nutritional data. Try retaking with better lighting or a clearer angle.`
-    : 'Could not analyze the image. Please check your internet connection and try again.';
-  document.getElementById('scanner-name').textContent = recognizedName || '❌ Scan Failed';
+  document.getElementById('scanner-source').textContent = 'Could not analyze the image. Please try again or check your API key.';
+  document.getElementById('scanner-name').textContent = '❌ Scan Failed';
   document.getElementById('scanner-macros').innerHTML = MacroBar(0, 0, 0, 0);
   document.getElementById('scanner-composition').innerHTML = '';
   document.getElementById('btn-add-scanned').style.display = 'none';
@@ -148,8 +155,7 @@ function renderScannerResult() {
   document.getElementById('scanner-alert').style.display = 'block';
   document.getElementById('btn-add-scanned').style.display = ''; // Ensure button is visible
 
-  const srcString = 'CalorieNinjas API';
-  document.getElementById('scanner-source').textContent = `Real nutrition data fetched from ${srcString}.`;
+  document.getElementById('scanner-source').textContent = `Nutrition profile generated visually by Google Gemini AI.`;
 
   document.getElementById('scanner-name').textContent = currentScannedFood.name.charAt(0).toUpperCase() + currentScannedFood.name.slice(1);
   updateScannerQty(0); // Update multiplier
@@ -159,14 +165,6 @@ function renderScannerResult() {
     <div class="composition-row" style="margin-top:8px;">
       <span>Serving Size</span>
       <span>${currentScannedFood.serving}</span>
-    </div>
-    <div class="composition-row">
-      <span>Fiber</span>
-      <span>${(currentScannedFood.fiber * scannerQty).toFixed(1)}g</span>
-    </div>
-    <div class="composition-row">
-      <span>Sugar</span>
-      <span>${(currentScannedFood.sugar * scannerQty).toFixed(1)}g</span>
     </div>
   `;
 }
