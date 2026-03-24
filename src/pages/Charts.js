@@ -26,6 +26,16 @@ function ChartsPage() {
 
       <!-- Stats -->
       <div id="chart-stats"></div>
+
+      <!-- BMI Card -->
+      <div id="bmi-section" style="margin-top:20px; margin-bottom: 12px; padding: 0 16px;">
+        ${typeof BMICard === 'function' ? BMICard() : ''}
+      </div>
+
+      <!-- Steps Tracker -->
+      <div id="steps-section" style="margin-bottom: 24px;">
+        ${typeof StepsTracker === 'function' ? StepsTracker() : ''}
+      </div>
     </div>
 
     ${NavBar('charts')}

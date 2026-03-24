@@ -105,10 +105,7 @@ function FoodDiaryPage() {
         <div style="font-size:3.5rem;line-height:1;">🥬</div>
       </div>
 
-      <!-- BMI Card -->
-      <div id="bmi-section" style="margin-top:12px;">
-        ${BMICard()}
-      </div>
+
 
       <!-- Date Row -->
       <div class="date-row">
@@ -142,10 +139,6 @@ function FoodDiaryPage() {
         ${WaterTracker()}
       </div>
 
-      <!-- Steps Tracker -->
-      <div id="steps-section" style="margin-top:12px;">
-        ${StepsTracker()}
-      </div>
 
       <!-- Eaten section -->
       <div class="section-title">Eaten:</div>
