@@ -95,7 +95,11 @@ async function processScannedImage() {
 
     const errorPayload = await response.clone().json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(errorPayload.error || `API Error: ${response.status}`);
+      const detailMessage = typeof errorPayload.details === 'string'
+        ? errorPayload.details.split('\n')[0]
+        : '';
+      const finalMessage = detailMessage || errorPayload.error || `API Error: ${response.status}`;
+      throw new Error(finalMessage);
     }
 
     const parsedData = await response.json();

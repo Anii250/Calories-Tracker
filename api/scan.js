@@ -51,9 +51,17 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+      const statusCode = data?.error?.code || response.status;
+      const apiMessage = data?.error?.message || 'Gemini API rejected the request';
+      if (statusCode === 429) {
+        return res.status(429).json({
+          error: 'Gemini quota exceeded',
+          details: apiMessage
+        });
+      }
       return res.status(502).json({
         error: 'Gemini API rejected the request',
-        details: data
+        details: apiMessage
       });
     }
 
