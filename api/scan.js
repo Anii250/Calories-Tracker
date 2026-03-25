@@ -14,8 +14,12 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Missing GEMINI_API_KEY in Vercel environment variables' });
     }
 
-    const base64Data = String(image).replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const imageString = String(image);
+    const mimeMatch = imageString.match(/^data:(image\/(png|jpeg|jpg|webp));base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1].replace('jpg', 'jpeg') : 'image/jpeg';
+    const base64Data = imageString.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
+    const model = 'gemini-2.0-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const payload = {
       contents: [
@@ -26,7 +30,7 @@ export default async function handler(req, res) {
             },
             {
               inline_data: {
-                mime_type: 'image/jpeg',
+                mime_type: mimeType,
                 data: base64Data
               }
             }
