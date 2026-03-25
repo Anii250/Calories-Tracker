@@ -1,15 +1,16 @@
+/* global firebase */
 /* ============================================================
    CalorieAI — Firebase Configuration & Initialization
    ============================================================ */
 
-const firebaseConfig = window.CONFIG?.FIREBASE || {
-    apiKey: "MISSING",
-    authDomain: "MISSING",
-    projectId: "MISSING",
-    storageBucket: "MISSING",
-    messagingSenderId: "MISSING",
-    appId: "MISSING",
-    measurementId: "MISSING"
+const firebaseConfig = {
+  apiKey: "AIzaSyB1oxRfoH8ypDjUv22RmbXMWLSuRBa14WE",
+  authDomain: "calorieai-aacbc.firebaseapp.com",
+  projectId: "calorieai-aacbc",
+  storageBucket: "calorieai-aacbc.firebasestorage.app",
+  messagingSenderId: "593978879361",
+  appId: "1:593978879361:web:240e3e62ffe72f5a3c0c80",
+  measurementId: "G-HBGVJ61BV6"
 };
 
 // Initialize Firebase
@@ -145,7 +146,7 @@ const Auth = (() => {
 
     return {
         getCurrentUser, isLoggedIn,
-        signUpEmail, loginEmail, loginGoogle, 
+        signUpEmail, loginEmail, loginGoogle,
         loginGooglePopup, loginGoogleRedirect, handleRedirectResult,
         logout, onAuthChanged
     };
@@ -170,31 +171,12 @@ const CloudSync = (() => {
                 dailyGoal: data.dailyGoal || 1500,
                 waterTarget: data.waterTarget || 8,
                 stepsTarget: data.stepsTarget || 10000,
-                reminders: data.reminders || {},
-                hasOnboarded: data.hasOnboarded || false
+                reminders: data.reminders || { enabled: false },
+                hasOnboarded: data.hasOnboarded || false,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         } catch (e) {
-            console.log('Cloud sync error:', e);
-        }
-    }
-
-    async function saveMeals(dateKey, meals) {
-        const ref = getUserRef();
-        if (!ref) return;
-        try {
-            await ref.collection('meals').doc(dateKey).set(meals);
-        } catch (e) {
-            console.log('Meal sync error:', e);
-        }
-    }
-
-    async function saveWater(dateKey, glasses) {
-        const ref = getUserRef();
-        if (!ref) return;
-        try {
-            await ref.collection('water').doc(dateKey).set({ glasses });
-        } catch (e) {
-            console.log('Water sync error:', e);
+            console.error("Cloud save failed:", e);
         }
     }
 
@@ -207,53 +189,28 @@ const CloudSync = (() => {
                 return doc.data();
             }
         } catch (e) {
-            console.log('Cloud load error:', e);
+            console.error("Cloud load failed:", e);
         }
         return null;
     }
 
-    async function loadMeals(dateKey) {
-        const ref = getUserRef();
-        if (!ref) return null;
-        try {
-            const doc = await ref.collection('meals').doc(dateKey).get();
-            if (doc.exists) return doc.data();
-        } catch (e) { }
-        return null;
-    }
-
-    async function loadWater(dateKey) {
-        const ref = getUserRef();
-        if (!ref) return 0;
-        try {
-            const doc = await ref.collection('water').doc(dateKey).get();
-            if (doc.exists) return doc.data().glasses || 0;
-        } catch (e) { }
-        return 0;
-    }
-
-    async function saveSteps(dateKey, steps) {
+    async function saveMeals(dayKey, meals) {
         const ref = getUserRef();
         if (!ref) return;
         try {
-            await ref.collection('steps').doc(dateKey).set({ count: steps });
+            // Store each day in a subcollection to avoid document size limits
+            await ref.collection('days').doc(dayKey).set({
+                meals: meals,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
         } catch (e) {
-            console.log('Steps sync error:', e);
+            console.error("Cloud meals save failed:", e);
         }
     }
 
-    async function loadSteps(dateKey) {
-        const ref = getUserRef();
-        if (!ref) return 0;
-        try {
-            const doc = await ref.collection('steps').doc(dateKey).get();
-            if (doc.exists) return doc.data().count || 0;
-        } catch (e) { }
-        return 0;
-    }
-
     return {
-        saveToCloud, saveMeals, saveWater, saveSteps,
-        loadFromCloud, loadMeals, loadWater, loadSteps
+        saveToCloud,
+        loadFromCloud,
+        saveMeals
     };
 })();

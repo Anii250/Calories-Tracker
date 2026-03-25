@@ -88,11 +88,17 @@ const Router = (() => {
             await Auth.handleRedirectResult();
         } catch (err) {
             console.error("Redirect auth error:", err);
-            // If we are on login page, we can show this error
+            // If we are on login page, we can show this error.
+            // Note: error UI might not exist yet (AuthPage may render after this),
+            // so store a global value that AuthPage can read when building HTML.
             if (window.location.hash.includes('login')) {
+                window.__AUTH_REDIRECT_ERROR__ =
+                    "Sign-in failed: " + (err?.message || "Unknown error") +
+                    (err?.code ? ` (code: ${err.code})` : "");
+
                 const errorEl = document.getElementById('auth-error');
                 if (errorEl) {
-                    errorEl.textContent = "Sign-in failed: " + (err.message || "Unknown error");
+                    errorEl.textContent = window.__AUTH_REDIRECT_ERROR__;
                     errorEl.style.display = 'block';
                 }
             }
