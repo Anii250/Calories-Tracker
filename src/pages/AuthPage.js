@@ -131,9 +131,15 @@ async function handleGoogleSignIn(e) {
   try {
     googleBtn.innerHTML = 'Connecting...';
     googleBtn.disabled = true;
-    // Use redirect flow on browsers/environments that block popups.
-    // Redirect flow completes via `Auth.handleRedirectResult()` on load.
-    await Auth.loginGoogleRedirect();
+    
+    // Auth.loginGoogle handles popup with fallback to redirect.
+    // If it's a popup, it returns the user. If redirect, the page will reload.
+    const user = await Auth.loginGoogle();
+    
+    if (user) {
+        // Successful popup login
+        window.location.hash = '#/diary';
+    }
   } catch (err) {
     console.error("Google login failure:", err);
     let msg = 'Google sign-in failed. Try again.';

@@ -45,15 +45,17 @@ const Router = (() => {
 
     function render() {
         const route = getRoute();
+        const user = Auth.getCurrentUser();
+        const isLoggedIn = !!user;
 
         // Auth guard — redirect to login if not signed in
-        if (!Auth.isLoggedIn() && route !== 'login') {
+        if (!isLoggedIn && route !== 'login') {
             location.hash = '#/login';
             return;
         }
 
         // If logged in but on login page, go to diary
-        if (Auth.isLoggedIn() && route === 'login') {
+        if (isLoggedIn && route === 'login') {
             location.hash = '#/diary';
             return;
         }
@@ -79,60 +81,58 @@ const Router = (() => {
         location.hash = '#/' + route;
     }
 
-    window.addEventListener('hashchange', render);
+    let isAuthInitialized = false;
+
+    window.addEventListener('hashchange', () => {
+        if (isAuthInitialized) render();
+    });
+
     window.addEventListener('DOMContentLoaded', async () => {
         initSplash();
 
-        // Handle Google Sign-In redirect results
+        // 1. First, handle any pending redirect results
         try {
-            await Auth.handleRedirectResult();
-        } catch (err) {
-            console.error("Redirect auth error:", err);
-            // If we are on login page, we can show this error.
-            // Note: error UI might not exist yet (AuthPage may render after this),
-            // so store a global value that AuthPage can read when building HTML.
-            if (window.location.hash.includes('login')) {
-                window.__AUTH_REDIRECT_ERROR__ =
-                    "Sign-in failed: " + (err?.message || "Unknown error") +
-                    (err?.code ? ` (code: ${err.code})` : "");
-
-                const errorEl = document.getElementById('auth-error');
-                if (errorEl) {
-                    errorEl.textContent = window.__AUTH_REDIRECT_ERROR__;
-                    errorEl.style.display = 'block';
+            const redirectUser = await Auth.handleRedirectResult();
+            if (redirectUser) {
+                console.log("Redirect sign-in successful:", redirectUser.email);
+                // Force hash to diary if we just came back from a successful redirect
+                if (!window.location.hash || window.location.hash.includes('login')) {
+                    window.location.hash = '#/diary';
                 }
             }
+        } catch (err) {
+            console.error("Redirect auth error:", err);
+            window.__AUTH_REDIRECT_ERROR__ =
+                "Sign-in failed: " + (err?.message || "Unknown error") +
+                (err?.code ? ` (code: ${err.code})` : "");
         }
 
-        // Listen for Firebase auth state
+        // 2. Listen for Firebase auth state to handle the initial session load
         Auth.onAuthChanged(async (user) => {
             const currentHash = window.location.hash;
             
             if (user) {
-                // Sync from cloud on login — MUST happen before render()
-                // so that hasOnboarded and profile are available for routing
                 try {
                     const cloudData = await CloudSync.loadFromCloud();
                     if (cloudData) {
                         Store.mergeCloudData(cloudData);
                     }
                 } catch (e) {
-                    // Cloud unavailable — use whatever is in localStorage
+                    console.warn("Cloud sync failed, using local data");
                 }
 
-                // If user is logged in but on login page or empty hash, redirect to diary
                 if (!currentHash || currentHash === '#/login' || currentHash === '#/') {
                     window.location.hash = '#/diary';
-                    return; // Hash change will trigger render()
+                    // The hash change will trigger render if isAuthInitialized is true,
+                    // but on first load we need to ensure render() is called.
                 }
             } else {
-                // If user is not logged in and not on login page, redirect to login
                 if (currentHash && currentHash !== '#/login') {
                     window.location.hash = '#/login';
-                    return; // Hash change will trigger render()
                 }
             }
             
+            isAuthInitialized = true;
             render();
         });
     });
