@@ -5,6 +5,20 @@
 let authMode = 'login'; // 'login' or 'signup'
 
 function AuthPage() {
+  // If Firebase redirect failed, `src/main.js` stores the message here.
+  const redirectError = (window.__AUTH_REDIRECT_ERROR__ || '').toString();
+  if (window.__AUTH_REDIRECT_ERROR__) window.__AUTH_REDIRECT_ERROR__ = null;
+
+  // Prevent HTML injection in error messages.
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   return `
     <div class="page auth-page" id="auth-page">
       <div class="auth-container">
@@ -28,7 +42,7 @@ function AuthPage() {
             <input type="password" id="auth-password" placeholder="${authMode === 'signup' ? 'Create a password (6+ chars)' : 'Enter your password'}" autocomplete="${authMode === 'signup' ? 'new-password' : 'current-password'}" />
           </div>
 
-          <div class="auth-error" id="auth-error" style="display:none;"></div>
+          <div class="auth-error" id="auth-error" style="display:${redirectError ? 'block' : 'none'};">${redirectError ? escapeHtml(redirectError) : ''}</div>
 
           <button class="btn btn-primary auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">
             ${authMode === 'login' ? 'Sign In' : 'Create Account'}
@@ -115,7 +129,9 @@ async function handleGoogleSignIn() {
   try {
     googleBtn.innerHTML = 'Connecting...';
     googleBtn.disabled = true;
-    await Auth.loginGoogle();
+    // Use redirect flow on browsers/environments that block popups.
+    // Redirect flow completes via `Auth.handleRedirectResult()` on load.
+    await Auth.loginGoogleRedirect();
   } catch (err) {
     console.error("Google login failure:", err);
     let msg = 'Google sign-in failed. Try again.';
