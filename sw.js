@@ -3,7 +3,7 @@
    ============================================================ */
 
 // Bump cache version so updated auth files are fetched.
-const CACHE_NAME = 'calorieai-v14';
+const CACHE_NAME = 'calorieai-v15';
 
 const PRECACHE_URLS = [
     './',
@@ -12,10 +12,10 @@ const PRECACHE_URLS = [
     './styles/index.css',
     './icons/icon-192.png',
     './icons/icon-512.png',
-    './src/firebase-config.js?v=10',
+    './src/firebase-config.js?v=11',
     './src/nutrition-api.js?v=8',
     './src/store.js?v=8',
-    './src/main.js?v=10',
+    './src/main.js?v=11',
     './src/components/ProgressRing.js?v=8',
     './src/components/MacroBar.js?v=8',
     './src/components/MealCard.js?v=8',
@@ -30,7 +30,7 @@ const PRECACHE_URLS = [
     './src/components/CameraCapture.js?v=8',
     './src/components/MealReminders.js?v=8',
     './src/components/ExportData.js?v=8',
-    './src/pages/AuthPage.js?v=10',
+    './src/pages/AuthPage.js?v=11',
     './src/pages/FoodDiary.js?v=8',
     './src/pages/Charts.js?v=8',
     './src/pages/Scanner.js?v=8',
