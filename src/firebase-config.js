@@ -2,14 +2,14 @@
    CalorieAI — Firebase Configuration & Initialization
    ============================================================ */
 
-const firebaseConfig = {
-    apiKey: "AIzaSyB1oxRfoH8ypDjUv22RmbXMWLSuRBa14WE",
-    authDomain: "calorieai-aacbc.firebaseapp.com",
-    projectId: "calorieai-aacbc",
-    storageBucket: "calorieai-aacbc.firebasestorage.app",
-    messagingSenderId: "593978879361",
-    appId: "1:593978879361:web:240e3e62ffe72f5a3c0c80",
-    measurementId: "G-HBGVJ61BV6"
+const firebaseConfig = window.CONFIG?.FIREBASE || {
+    apiKey: "MISSING",
+    authDomain: "MISSING",
+    projectId: "MISSING",
+    storageBucket: "MISSING",
+    messagingSenderId: "MISSING",
+    appId: "MISSING",
+    measurementId: "MISSING"
 };
 
 // Initialize Firebase

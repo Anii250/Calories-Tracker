@@ -68,8 +68,15 @@ async function processScannedImage() {
   document.querySelector('#scanner-loader h3').textContent = 'Analyzing Food...';
   document.querySelector('#scanner-loader .text-muted').textContent = 'Using Google Gemini AI...';
 
+  // Small delay to ensure preview image is fully set
+  await new Promise(r => setTimeout(r, 500));
+
   try {
     const imgEl = document.getElementById('camera-preview');
+    if (!imgEl || !imgEl.src || imgEl.src.length < 100) {
+        throw new Error('NO_IMAGE_DATA');
+    }
+    
     // Extract base64 payload from data URL
     const base64Data = imgEl.src.split(',')[1];
     
@@ -112,10 +119,24 @@ async function processScannedImage() {
     }
 
     const data = await response.json();
+    if (!data.candidates || !data.candidates[0]) {
+        throw new Error('EMPTY_GEMINI_RESPONSE');
+    }
+    
     const responseText = data.candidates[0].content.parts[0].text.trim();
     
-    // Strip possible markdown ticks just in case the AI ignores the strict prompt
-    const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Robust JSON extraction: Find the first { and last }
+    let cleanJson = responseText;
+    const startIdx = responseText.indexOf('{');
+    const endIdx = responseText.lastIndexOf('}');
+    
+    if (startIdx !== -1 && endIdx !== -1) {
+        cleanJson = responseText.substring(startIdx, endIdx + 1);
+    } else {
+        // Fallback to previous cleaning logic
+        cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    }
+    
     const parsedData = JSON.parse(cleanJson);
 
     document.getElementById('scanner-loader').style.display = 'none';
@@ -138,7 +159,7 @@ async function processScannedImage() {
   } catch (err) {
     console.error('Gemini Scanner Error:', err);
     document.getElementById('scanner-loader').style.display = 'none';
-    showScannerError(null);
+    showScannerError(err.message === 'NO_IMAGE_DATA' ? 'No image captured' : null);
   }
 }
 

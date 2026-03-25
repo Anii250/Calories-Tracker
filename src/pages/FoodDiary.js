@@ -160,22 +160,12 @@ function FoodDiaryPage() {
   `;
 }
 
-/* ---- Smart Meal Detection by Time ---- */
-function getMealTypeByTime() {
-  const h = new Date().getHours();
-  if (h >= 5  && h < 11) return 'breakfast'; // 5am  – 10:59am
-  if (h >= 11 && h < 15) return 'lunch';     // 11am – 2:59pm
-  if (h >= 15 && h < 18) return 'snacks';    // 3pm  – 5:59pm
-  if (h >= 18 && h < 22) return 'dinner';    // 6pm  – 9:59pm
-  return 'snacks';                            // late night
-}
-
 /* Add Food Modal — now with Food Search */
 function openAddFoodModal() {
   const existing = document.getElementById('add-food-overlay');
   if (existing) existing.remove();
 
-  const autoMeal = getMealTypeByTime();
+  const autoMeal = Store.getMealTypeByTime();
   const html = `
     <div class="add-food-overlay" id="add-food-overlay" onclick="closeAddFoodModal(event)">
       <div class="add-food-sheet" onclick="event.stopPropagation()">

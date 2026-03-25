@@ -216,7 +216,7 @@ function renderFoodResults(results, container, sourceIcon) {
 }
 
 function quickAddFood(name, cal, protein, fats, carbs) {
-  const mealType = document.getElementById('meal-type')?.value || getMealTypeByTime();
+  const mealType = document.getElementById('meal-type')?.value || Store.getMealTypeByTime();
   Store.addMeal(mealType, {
     name, calories: cal, proteins: protein, fats, carbs, qty: 1
   });

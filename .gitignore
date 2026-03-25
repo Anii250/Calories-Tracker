@@ -2,3 +2,4 @@ calories
 .DS_Store
 Thumbs.db
 .idea/
+config.js
