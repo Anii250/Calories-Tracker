@@ -9,42 +9,46 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No image provided' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: 'Missing GEMINI_API_KEY in Vercel environment variables' });
+      return res.status(500).json({ error: 'Missing OPENAI_API_KEY in Vercel environment variables' });
     }
 
     const imageString = String(image);
     const mimeMatch = imageString.match(/^data:(image\/(png|jpeg|jpg|webp));base64,/);
     const mimeType = mimeMatch ? mimeMatch[1].replace('jpg', 'jpeg') : 'image/jpeg';
     const base64Data = imageString.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
-    const model = 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const model = 'gpt-4o-mini';
+    const url = 'https://api.openai.com/v1/chat/completions';
 
     const payload = {
-      contents: [
+      model,
+      response_format: { type: 'json_object' },
+      messages: [
         {
-          parts: [
+          role: 'user',
+          content: [
             {
-              text: "Analyze this food. Return ONLY a raw JSON object with these exact keys: 'name' (string), 'calories' (number), 'protein' (number), 'fat' (number), 'carbs' (number). Do not include any markdown formatting, backticks, or extra text."
+              type: 'text',
+              text: "Analyze this food image. Return ONLY a raw JSON object with these exact keys: name (string), calories (number), protein (number), fat (number), carbs (number). Do not include markdown, backticks, or extra text."
             },
             {
-              inline_data: {
-                mime_type: mimeType,
-                data: base64Data
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${base64Data}`
               }
             }
           ]
         }
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json'
-      }
+      ]
     };
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -52,22 +56,22 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const statusCode = data?.error?.code || response.status;
-      const apiMessage = data?.error?.message || 'Gemini API rejected the request';
+      const apiMessage = data?.error?.message || 'OpenAI API rejected the request';
       if (statusCode === 429) {
         return res.status(429).json({
-          error: 'Gemini quota exceeded',
+          error: 'OpenAI quota exceeded',
           details: apiMessage
         });
       }
       return res.status(502).json({
-        error: 'Gemini API rejected the request',
+        error: 'OpenAI API rejected the request',
         details: apiMessage
       });
     }
 
-    let textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let textResponse = data?.choices?.[0]?.message?.content || '';
     if (!textResponse) {
-      return res.status(502).json({ error: 'Gemini returned an empty response', details: data });
+      return res.status(502).json({ error: 'OpenAI returned an empty response', details: data });
     }
 
     textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();

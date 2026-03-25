@@ -66,7 +66,7 @@ async function processScannedImage() {
   document.getElementById('scanner-result').style.display = 'none';
 
   document.querySelector('#scanner-loader h3').textContent = 'Analyzing Food...';
-  document.querySelector('#scanner-loader .text-muted').textContent = 'Using Google Gemini AI...';
+  document.querySelector('#scanner-loader .text-muted').textContent = 'Using OpenAI Vision...';
 
   // Small delay to ensure preview image is fully set
   await new Promise(r => setTimeout(r, 500));
@@ -114,15 +114,15 @@ async function processScannedImage() {
       carbs: parsedData.carbs || 0,
       fiber: 0,
       sugar: 0,
-      serving: 'Estimated by Gemini AI',
-      source: 'gemini'
+      serving: 'Estimated by OpenAI Vision',
+      source: 'openai'
     };
     
     scannerQty = 1;
     renderScannerResult();
 
   } catch (err) {
-    console.error('Gemini Scanner Error:', err);
+    console.error('OpenAI Scanner Error:', err);
     document.getElementById('scanner-loader').style.display = 'none';
     showScannerError(err.message === 'NO_IMAGE_DATA' ? 'No image captured' : err.message);
   }
@@ -149,7 +149,7 @@ function renderScannerResult() {
   document.getElementById('scanner-alert').style.display = 'block';
   document.getElementById('btn-add-scanned').style.display = ''; // Ensure button is visible
 
-  document.getElementById('scanner-source').textContent = `Nutrition profile generated visually by Google Gemini AI.`;
+  document.getElementById('scanner-source').textContent = `Nutrition profile generated visually by OpenAI Vision.`;
 
   document.getElementById('scanner-name').textContent = currentScannedFood.name.charAt(0).toUpperCase() + currentScannedFood.name.slice(1);
   updateScannerQty(0); // Update multiplier
