@@ -71,7 +71,7 @@
   <script src="src/pages/AuthPage.js?v=11"></script>
   <script src="src/pages/FoodDiary.js?v=8"></script>
   <script src="src/pages/Charts.js?v=8"></script>
-  <script src="src/pages/Scanner.js?v=13"></script>
+  <script src="src/pages/Scanner.js?v=14"></script>
   <script src="src/pages/Settings.js?v=8"></script>
   <script src="src/pages/Onboarding.js?v=8"></script>
 
@@ -79,14 +79,11 @@
   <script src="src/main.js?v=11"></script>
 
   <script>
-    if ('serviceWorker' in navigator && window.location.hostname.includes('vercel.app')) {
-      window.addEventListener('load', async () => {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(reg => reg.unregister()));
-        if ('caches' in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(key => caches.delete(key)));
-        }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=17')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
       });
     }
   </script>
