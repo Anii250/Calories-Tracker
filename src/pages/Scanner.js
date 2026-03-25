@@ -80,32 +80,11 @@ async function processScannedImage() {
     // Extract base64 payload from data URL
     const base64Data = imgEl.src.split(',')[1];
     
-    // Check if user has entered an API key in Settings
-    const apiKey = typeof Store !== 'undefined' ? Store.getGeminiApiKey() : '';
-    if (!apiKey) {
-      alert("Please enter your Gemini API Key in the Settings page first!");
-      document.getElementById('scanner-loader').style.display = 'none';
-      Router.navigate('settings');
-      return;
-    }
-    
-    // Gemini API Request
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Backend Vercel Serverless Function Request
+    const url = '/api/scan';
     
     const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: 'Analyze this image. Identify the primary food item. Respond ONLY with a valid, raw JSON object (no markdown, no backticks) containing exactly these keys: "foodName" (string), "calories" (number), "protein" (number), "carbs" (number), "fats" (number).' },
-            {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: base64Data
-              }
-            }
-          ]
-        }
-      ]
+      image: base64Data
     };
 
     const response = await fetch(url, {
@@ -115,37 +94,18 @@ async function processScannedImage() {
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API Error: ${response.status}`);
+      throw new Error(`API Error: ${response.status}`);
     }
 
-    const data = await response.json();
-    if (!data.candidates || !data.candidates[0]) {
-        throw new Error('EMPTY_GEMINI_RESPONSE');
-    }
-    
-    const responseText = data.candidates[0].content.parts[0].text.trim();
-    
-    // Robust JSON extraction: Find the first { and last }
-    let cleanJson = responseText;
-    const startIdx = responseText.indexOf('{');
-    const endIdx = responseText.lastIndexOf('}');
-    
-    if (startIdx !== -1 && endIdx !== -1) {
-        cleanJson = responseText.substring(startIdx, endIdx + 1);
-    } else {
-        // Fallback to previous cleaning logic
-        cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-    }
-    
-    const parsedData = JSON.parse(cleanJson);
+    const parsedData = await response.json();
 
     document.getElementById('scanner-loader').style.display = 'none';
 
     currentScannedFood = {
-      name: parsedData.foodName || 'Unknown Food',
+      name: parsedData.name || 'Unknown Food',
       calories: parsedData.calories || 0,
       proteins: parsedData.protein || 0,
-      fats: parsedData.fats || 0,
+      fats: parsedData.fat || 0,
       carbs: parsedData.carbs || 0,
       fiber: 0,
       sugar: 0,
