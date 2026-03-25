@@ -80,8 +80,23 @@ const Router = (() => {
     }
 
     window.addEventListener('hashchange', render);
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
         initSplash();
+
+        // Handle Google Sign-In redirect results
+        try {
+            await Auth.handleRedirectResult();
+        } catch (err) {
+            console.error("Redirect auth error:", err);
+            // If we are on login page, we can show this error
+            if (window.location.hash.includes('login')) {
+                const errorEl = document.getElementById('auth-error');
+                if (errorEl) {
+                    errorEl.textContent = "Sign-in failed: " + (err.message || "Unknown error");
+                    errorEl.style.display = 'block';
+                }
+            }
+        }
 
         // Listen for Firebase auth state
         Auth.onAuthChanged(async (user) => {

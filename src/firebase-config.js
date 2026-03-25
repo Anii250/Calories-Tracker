@@ -45,11 +45,63 @@ const Auth = (() => {
         return cred.user;
     }
 
+    async function loginGooglePopup() {
+        try {
+            const cred = await auth.signInWithPopup(googleProvider);
+            // Create/ensure the user document, but never block auth on Firestore issues.
+            // Some projects lock down writes; in that case Google sign-in should still succeed.
+            try {
+                await createUserDoc(cred.user);
+            } catch (e) {
+                console.log("createUserDoc after Google popup failed:", e);
+            }
+            return cred.user;
+        } catch (error) {
+            console.error("Google Popup Error:", error);
+            throw error;
+        }
+    }
+
+    async function loginGoogleRedirect() {
+        try {
+            await auth.signInWithRedirect(googleProvider);
+        } catch (error) {
+            console.error("Google Redirect Error:", error);
+            throw error;
+        }
+    }
+
     async function loginGoogle() {
-        const cred = await auth.signInWithPopup(googleProvider);
-        // Create user doc if first time
-        await createUserDoc(cred.user);
-        return cred.user;
+        try {
+            // Try popup first
+            return await loginGooglePopup();
+        } catch (err) {
+            // Fallback to redirect if popup is blocked or fails
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+                console.log("Popup blocked, falling back to redirect...");
+                return await loginGoogleRedirect();
+            }
+            throw err;
+        }
+    }
+
+    async function handleRedirectResult() {
+        try {
+            const result = await auth.getRedirectResult();
+            if (result && result.user) {
+                // Same as popup flow: don't block login completion on Firestore doc creation.
+                try {
+                    await createUserDoc(result.user);
+                } catch (e) {
+                    console.log("createUserDoc after Google redirect failed:", e);
+                }
+                return result.user;
+            }
+        } catch (error) {
+            console.error("Redirect Result Error:", error);
+            throw error;
+        }
+        return null;
     }
 
     async function logout() {
@@ -61,6 +113,7 @@ const Auth = (() => {
     }
 
     async function createUserDoc(user) {
+        if (!user) return;
         const docRef = db.collection('users').doc(user.uid);
         const doc = await docRef.get();
         if (!doc.exists) {
@@ -92,8 +145,9 @@ const Auth = (() => {
 
     return {
         getCurrentUser, isLoggedIn,
-        signUpEmail, loginEmail, loginGoogle, logout,
-        onAuthChanged
+        signUpEmail, loginEmail, loginGoogle, 
+        loginGooglePopup, loginGoogleRedirect, handleRedirectResult,
+        logout, onAuthChanged
     };
 })();
 

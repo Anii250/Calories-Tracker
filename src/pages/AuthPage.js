@@ -108,12 +108,38 @@ async function handleAuthSubmit() {
 }
 
 async function handleGoogleSignIn() {
+  const errorEl = document.getElementById('auth-error');
+  const googleBtn = document.querySelector('.auth-google-btn');
+  const originalHtml = googleBtn.innerHTML;
+
   try {
+    googleBtn.innerHTML = 'Connecting...';
+    googleBtn.disabled = true;
     await Auth.loginGoogle();
   } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') {
-      showAuthError('Google sign-in failed. Try again.');
+    console.error("Google login failure:", err);
+    let msg = 'Google sign-in failed. Try again.';
+    
+    if (err.code === 'auth/popup-blocked') {
+      msg = 'Popup blocked! Fallback to redirect...';
+    } else if (err.code === 'auth/cancelled-popup-request') {
+      msg = 'Popup request cancelled.';
+    } else if (err.code === 'auth/popup-closed-by-user') {
+      msg = 'Sign-in popup was closed.';
+    } else if (err.code === 'auth/internal-error') {
+      msg = 'Internal authentication error. Check connection.';
+    } else if (err.code === 'auth/network-request-failed') {
+      msg = 'Network error. Please check your internet.';
+    } else if (err.code === 'auth/unauthorized-domain') {
+      msg = 'This domain is not authorized in Firebase Console.';
     }
+
+    // Surface the exact Firebase error so you can fix OAuth/config quickly.
+    if (err?.code) msg += ` (code: ${err.code})`;
+    if (err?.message) msg += ` - ${err.message}`;
+    showAuthError(msg);
+    googleBtn.innerHTML = originalHtml;
+    googleBtn.disabled = false;
   }
 }
 
