@@ -84,10 +84,7 @@ function BMICard() {
         <div class="bmi-card__energy-indicator">📉 Weight loss target: ~${energy.cutTarget} kcal/day (TDEE - 50)</div>
       </div>
 
-      <div class="bmi-card__ai" id="bmi-ai-section">
-        <button class="bmi-card__ai-btn" id="bmi-ai-btn" onclick="fetchBMIInsight(${bmi.toFixed(1)}, ${weight}, ${height}, ${energy.tdee})">✨ Get AI Insight</button>
-        <div class="bmi-card__ai-tip" id="bmi-ai-tip" style="display:none;"></div>
-      </div>
+      <div class="bmi-card__tip">💡 A balanced diet and regular exercise are the best ways to reach your TDEE goals.</div>
     </div>
   `;
 }
@@ -154,34 +151,4 @@ function getEnergyInsights(weightKg, heightCm, age, activity) {
     const tdee = Math.round(bmr * multiplier);
     const cutTarget = Math.max(1200, tdee - 50);
     return { bmr, tdee, cutTarget };
-}
-
-async function fetchBMIInsight(bmi, weight, height, tdee) {
-    const button = document.getElementById('bmi-ai-btn');
-    const tipBox = document.getElementById('bmi-ai-tip');
-    if (!button || !tipBox) return;
-    button.disabled = true;
-    button.textContent = 'Generating...';
-
-    try {
-        const response = await fetch('/api/insight', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bmi, weight, height, tdee })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(data.error || 'Could not generate AI insight');
-        }
-        tipBox.textContent = data.insight || 'You are making progress. Stay consistent with your calorie target and daily movement.';
-        button.style.display = 'none';
-        tipBox.style.display = 'block';
-        tipBox.classList.remove('bmi-card__ai-tip--visible');
-        void tipBox.offsetWidth;
-        tipBox.classList.add('bmi-card__ai-tip--visible');
-    } catch (error) {
-        button.disabled = false;
-        button.textContent = '✨ Get AI Insight';
-        alert(error.message || 'Could not generate AI insight right now.');
-    }
 }
