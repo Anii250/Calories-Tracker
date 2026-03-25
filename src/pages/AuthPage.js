@@ -44,7 +44,7 @@ function AuthPage() {
 
           <div class="auth-error" id="auth-error" style="display:${redirectError ? 'block' : 'none'};">${redirectError ? escapeHtml(redirectError) : ''}</div>
 
-          <button class="btn btn-primary auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">
+          <button type="button" class="btn btn-primary auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit(event)">
             ${authMode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
 
@@ -52,7 +52,7 @@ function AuthPage() {
             <span>or</span>
           </div>
 
-          <button class="btn auth-google-btn" onclick="handleGoogleSignIn()">
+          <button type="button" class="btn auth-google-btn" onclick="handleGoogleSignIn(event)">
             <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
               <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
@@ -79,7 +79,8 @@ function switchAuthMode(mode) {
   if (app) app.innerHTML = AuthPage();
 }
 
-async function handleAuthSubmit() {
+async function handleAuthSubmit(e) {
+  if (e) e.preventDefault();
   const email = document.getElementById('auth-email')?.value?.trim();
   const password = document.getElementById('auth-password')?.value;
   const name = document.getElementById('auth-name')?.value?.trim();
@@ -121,7 +122,8 @@ async function handleAuthSubmit() {
   }
 }
 
-async function handleGoogleSignIn() {
+async function handleGoogleSignIn(e) {
+  if (e) e.preventDefault();
   const errorEl = document.getElementById('auth-error');
   const googleBtn = document.querySelector('.auth-google-btn');
   const originalHtml = googleBtn.innerHTML;

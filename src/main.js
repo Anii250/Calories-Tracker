@@ -106,6 +106,8 @@ const Router = (() => {
 
         // Listen for Firebase auth state
         Auth.onAuthChanged(async (user) => {
+            const currentHash = window.location.hash;
+            
             if (user) {
                 // Sync from cloud on login — MUST happen before render()
                 // so that hasOnboarded and profile are available for routing
@@ -117,7 +119,20 @@ const Router = (() => {
                 } catch (e) {
                     // Cloud unavailable — use whatever is in localStorage
                 }
+
+                // If user is logged in but on login page or empty hash, redirect to diary
+                if (!currentHash || currentHash === '#/login' || currentHash === '#/') {
+                    window.location.hash = '#/diary';
+                    return; // Hash change will trigger render()
+                }
+            } else {
+                // If user is not logged in and not on login page, redirect to login
+                if (currentHash && currentHash !== '#/login') {
+                    window.location.hash = '#/login';
+                    return; // Hash change will trigger render()
+                }
             }
+            
             render();
         });
     });
