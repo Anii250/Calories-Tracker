@@ -78,7 +78,12 @@ const Router = (() => {
     }
 
     function navigate(route) {
-        location.hash = '#/' + route;
+        const targetHash = '#/' + route;
+        if (location.hash === targetHash) {
+            render();
+            return;
+        }
+        location.hash = targetHash;
     }
 
     let isAuthInitialized = false;

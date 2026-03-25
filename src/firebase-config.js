@@ -169,6 +169,7 @@ const CloudSync = (() => {
             await ref.update({
                 profile: data.profile || {},
                 dailyGoal: data.dailyGoal || 1500,
+                steps: data.steps || {},
                 waterTarget: data.waterTarget || 8,
                 stepsTarget: data.stepsTarget || 10000,
                 reminders: data.reminders || { enabled: false },

@@ -234,6 +234,13 @@ const Store = (() => {
     return data.meals[getTodayKey()] || { breakfast: [], lunch: [], dinner: [], snacks: [] };
   }
 
+  function syncMealsForDay(dayKey, dayMeals) {
+    if (typeof CloudSync === 'undefined' || typeof auth === 'undefined' || !auth.currentUser) return;
+    try {
+      CloudSync.saveMeals(dayKey, dayMeals);
+    } catch (e) { }
+  }
+
   function addMeal(mealType, item) {
     const data = load();
     const key = getTodayKey();
@@ -241,6 +248,7 @@ const Store = (() => {
     item.id = item.id || ('m' + Date.now());
     data.meals[key][mealType].push(item);
     save(data);
+    syncMealsForDay(key, data.meals[key]);
     return data;
   }
 
@@ -250,6 +258,7 @@ const Store = (() => {
     if (data.meals[key] && data.meals[key][mealType]) {
       data.meals[key][mealType] = data.meals[key][mealType].filter(m => m.id !== itemId);
       save(data);
+      syncMealsForDay(key, data.meals[key]);
     }
     return data;
   }
@@ -308,6 +317,7 @@ const Store = (() => {
     const key = dateKey || getTodayKey();
     data.steps[key] = Math.max(0, count);
     save(data);
+    syncToCloud();
     return data;
   }
 
@@ -493,6 +503,7 @@ const Store = (() => {
     const data = load();
     if (cloudData.profile) data.profile = { ...data.profile, ...cloudData.profile };
     if (cloudData.dailyGoal) data.dailyGoal = cloudData.dailyGoal;
+    if (cloudData.steps) data.steps = { ...(data.steps || {}), ...cloudData.steps };
     if (cloudData.waterTarget) data.waterTarget = cloudData.waterTarget;
     if (cloudData.stepsTarget) data.stepsTarget = cloudData.stepsTarget;
     if (cloudData.reminders) data.reminders = cloudData.reminders;

@@ -6,17 +6,11 @@
 // ---- Pedometer Engine (accelerometer-based) ----
 const Pedometer = (() => {
     let isTracking = false;
-    let lastMagnitude = 0;
-    let lastTimestamp = 0;
-    let stepBuffer = [];
-    let smoothedMag = 0;
+    let lastStepTimestamp = 0;
+    let isAboveThreshold = false;
 
-    // Tuning constants
-    const STEP_THRESHOLD = 1.35;       // Min acceleration spike to count as step
-    const STEP_COOLDOWN_MS = 280;      // Min ms between steps (prevents double-count)
-    const SMOOTHING_FACTOR = 0.2;      // Low-pass filter factor (0–1, lower = smoother)
-    const MIN_STEP_MAGNITUDE = 0.6;    // Min magnitude change to register
-    const BUFFER_SIZE = 4;             // Rolling buffer for peak detection
+    const STEP_THRESHOLD = 12.5;
+    const STEP_COOLDOWN_MS = 350;
 
     let motionHandler = null;
     let permissionGranted = false;
@@ -30,41 +24,20 @@ const Pedometer = (() => {
         const acc = event.accelerationIncludingGravity;
         if (!acc || acc.x === null) return;
 
-        const rawMag = getMagnitude(acc.x, acc.y, acc.z);
-
-        // Remove gravity (~9.8) to get dynamic acceleration
-        const dynamicMag = Math.abs(rawMag - 9.81);
-
-        // Low-pass filter to smooth noise
-        smoothedMag = SMOOTHING_FACTOR * dynamicMag + (1 - SMOOTHING_FACTOR) * smoothedMag;
-
-        // Add to buffer for peak detection
-        stepBuffer.push(smoothedMag);
-        if (stepBuffer.length > BUFFER_SIZE) stepBuffer.shift();
-
+        const magnitude = getMagnitude(acc.x, acc.y, acc.z);
         const now = Date.now();
-        const timeSinceLast = now - lastTimestamp;
+        const cooldownElapsed = now - lastStepTimestamp >= STEP_COOLDOWN_MS;
 
-        // Peak detection: current value is higher than threshold AND
-        // is a local peak (higher than neighbours) AND enough time has passed
-        if (stepBuffer.length >= 3 && timeSinceLast > STEP_COOLDOWN_MS) {
-            const len = stepBuffer.length;
-            const curr = stepBuffer[len - 2]; // use second-to-last for confirmed peak
-            const prev = stepBuffer[len - 3];
-            const next = stepBuffer[len - 1];
-
-            if (curr > STEP_THRESHOLD &&
-                curr > prev &&
-                curr >= next &&
-                (curr - Math.min(prev, next)) > MIN_STEP_MAGNITUDE) {
-                // Step detected!
-                lastTimestamp = now;
-                const currentSteps = Store.getSteps();
-                Store.setSteps(currentSteps + 1);
-            }
+        if (magnitude >= STEP_THRESHOLD && cooldownElapsed && !isAboveThreshold) {
+            isAboveThreshold = true;
+            lastStepTimestamp = now;
+            Store.addSteps(1);
+            reRenderSteps();
         }
 
-        lastMagnitude = smoothedMag;
+        if (magnitude < STEP_THRESHOLD - 1) {
+            isAboveThreshold = false;
+        }
     }
 
     async function requestPermission() {
@@ -102,11 +75,8 @@ const Pedometer = (() => {
         const hasPermission = await requestPermission();
         if (!hasPermission) return false;
 
-        // Reset state
-        stepBuffer = [];
-        smoothedMag = 0;
-        lastTimestamp = Date.now();
-        lastMagnitude = 0;
+        lastStepTimestamp = Date.now();
+        isAboveThreshold = false;
 
         motionHandler = handleMotion;
         window.addEventListener('devicemotion', motionHandler, { passive: true });
@@ -135,8 +105,7 @@ const Pedometer = (() => {
         }
 
         isTracking = false;
-        stepBuffer = [];
-        smoothedMag = 0;
+        isAboveThreshold = false;
 
         localStorage.setItem('calorieai_pedometer_active', 'false');
     }
@@ -145,40 +114,8 @@ const Pedometer = (() => {
         return isTracking;
     }
 
-    // Auto-start tracking on page load
-    function autoStart() {
-        if (!isSupported()) return;
-
-        // Check if user explicitly stopped tracking
-        if (localStorage.getItem('calorieai_pedometer_active') === 'false') return;
-
-        // Try to start directly (works on Android/desktop)
-        // On iOS, requestPermission requires a user gesture — handled below
-        start().catch(() => {});
-    }
-
-    return { start, stop, isTracking: getIsTracking, isSupported, autoStart };
+    return { start, stop, isTracking: getIsTracking, isSupported };
 })();
-
-// Auto-start on page load
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => Pedometer.autoStart(), 1500);
-
-    // iOS fallback: if auto-start failed due to gesture requirement,
-    // start on first user tap anywhere in the app
-    if (typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function') {
-        const iosAutoStart = () => {
-            if (!Pedometer.isTracking() && localStorage.getItem('calorieai_pedometer_active') !== 'false') {
-                Pedometer.start();
-            }
-            document.removeEventListener('touchstart', iosAutoStart);
-            document.removeEventListener('click', iosAutoStart);
-        };
-        document.addEventListener('touchstart', iosAutoStart, { once: true });
-        document.addEventListener('click', iosAutoStart, { once: true });
-    }
-});
 
 
 // ---- StepsTracker Component ----
