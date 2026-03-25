@@ -77,24 +77,25 @@ async function processScannedImage() {
         throw new Error('NO_IMAGE_DATA');
     }
     
-    // Extract base64 payload from data URL
-    const base64Data = imgEl.src.split(',')[1];
-    
-    // Backend Vercel Serverless Function Request
-    const url = '/api/scan';
-    
     const requestBody = {
-      image: base64Data
+      image: imgEl.src
     };
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
+    const urls = ['/api/scan', '/api/scan/', `${window.location.origin}/api/scan`];
+    let response = null;
+    for (const url of urls) {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        cache: 'no-store',
+        body: JSON.stringify(requestBody)
+      });
+      if (response.status !== 404) break;
+    }
 
+    const errorPayload = await response.clone().json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      throw new Error(errorPayload.error || `API Error: ${response.status}`);
     }
 
     const parsedData = await response.json();
@@ -119,18 +120,18 @@ async function processScannedImage() {
   } catch (err) {
     console.error('Gemini Scanner Error:', err);
     document.getElementById('scanner-loader').style.display = 'none';
-    showScannerError(err.message === 'NO_IMAGE_DATA' ? 'No image captured' : null);
+    showScannerError(err.message === 'NO_IMAGE_DATA' ? 'No image captured' : err.message);
   }
 }
 
-function showScannerError(recognizedName) {
+function showScannerError(message) {
   const loader = document.getElementById('scanner-loader');
   if (loader) loader.style.display = 'none';
   // Show a friendly error in the result panel
   const resultEl = document.getElementById('scanner-result');
   resultEl.style.display = 'block';
   document.getElementById('scanner-alert').style.display = 'block';
-  document.getElementById('scanner-source').textContent = 'Could not analyze the image. Please try again or check your API key.';
+  document.getElementById('scanner-source').textContent = message || 'Could not analyze the image. Please try again or check your API key.';
   document.getElementById('scanner-name').textContent = '❌ Scan Failed';
   document.getElementById('scanner-macros').innerHTML = MacroBar(0, 0, 0, 0);
   document.getElementById('scanner-composition').innerHTML = '';
