@@ -2,7 +2,6 @@
   "name": "calorie-ai",
   "version": "1.0.0",
   "description": "CalorieAI — Calories Tracker",
-  "main": "src/main.js",
   "scripts": {
     "build": "node generate-config.js"
   },
