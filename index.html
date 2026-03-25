@@ -71,7 +71,7 @@
   <script src="src/pages/AuthPage.js?v=11"></script>
   <script src="src/pages/FoodDiary.js?v=8"></script>
   <script src="src/pages/Charts.js?v=8"></script>
-  <script src="src/pages/Scanner.js?v=8"></script>
+  <script src="src/pages/Scanner.js?v=12"></script>
   <script src="src/pages/Settings.js?v=8"></script>
   <script src="src/pages/Onboarding.js?v=8"></script>
 
@@ -82,7 +82,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
+        navigator.serviceWorker.register('./sw.js?v=16')
           .then(reg => console.log('SW registered:', reg.scope))
           .catch(err => console.log('SW registration failed:', err));
       });

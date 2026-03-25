@@ -3,7 +3,7 @@
    ============================================================ */
 
 // Bump cache version so updated auth files are fetched.
-const CACHE_NAME = 'calorieai-v15';
+const CACHE_NAME = 'calorieai-v16';
 
 const PRECACHE_URLS = [
     './',
@@ -33,7 +33,7 @@ const PRECACHE_URLS = [
     './src/pages/AuthPage.js?v=11',
     './src/pages/FoodDiary.js?v=8',
     './src/pages/Charts.js?v=8',
-    './src/pages/Scanner.js?v=8',
+    './src/pages/Scanner.js?v=12',
     './src/pages/Settings.js?v=8',
     './src/pages/Onboarding.js?v=8'
 ];
@@ -57,6 +57,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    const requestUrl = new URL(event.request.url);
+    if (requestUrl.pathname.startsWith('/api/') || event.request.method !== 'GET') {
+        return;
+    }
     event.respondWith(
         caches.match(event.request)
             .then(cached => {
