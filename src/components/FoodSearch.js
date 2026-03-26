@@ -81,13 +81,15 @@ async function handleFoodSearch(query) {
     try {
       const response = await fetch(`/api/searchFood?query=${encodeURIComponent(trimmedQuery)}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API error response:", errorData);
+        throw new Error(`HTTP error! status: ${response.status}${errorData.error ? ' - ' + errorData.error : ''}`);
       }
       const results = await response.json();
       renderFoodCards(results.items, container);
     } catch (e) {
-      console.error("FoodSearch API Error:", e);
-      let icon = '⚠️', title = 'Something went wrong', desc = 'The server returned an unexpected error.';
+      console.error("FoodSearch API Error details:", e);
+      let icon = '⚠️', title = 'Something went wrong', desc = e.message || 'The server returned an unexpected error.';
 
       if (e.message === 'INVALID_KEY') {
         icon = '🔑'; title = 'Invalid API Key';
