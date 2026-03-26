@@ -64,20 +64,7 @@ async function handleFoodSearch(query) {
     const results = Store.searchFood(trimmedQuery);
     renderFoodResults(results, container, '📦');
   } else {
-    // CalorieNinjas API
-    if (!Store.getApiKey()) {
-      container.innerHTML = `
-        <div class="food-search__empty" style="padding: 24px; text-align: center;">
-          <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
-          <h4 style="margin-bottom: 8px;">API Key Required</h4>
-          <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 12px;">
-            Get your free key at <a href="https://calorieninjas.com/api" target="_blank" style="color:var(--accent)">calorieninjas.com/api</a> and add it in Settings.
-          </p>
-          <button class="btn btn-primary" onclick="Router.navigate('settings')" style="padding: 8px 16px; font-size: 14px;">Go to Settings</button>
-        </div>
-      `;
-      return;
-    }
+
 
     container.innerHTML = `
       <div class="food-search__loading">
@@ -92,8 +79,12 @@ async function handleFoodSearch(query) {
     if (searchInput) searchInput.disabled = true;
 
     try {
-      const results = await NutritionAPI.searchFood(trimmedQuery);
-      renderFoodCards(results, container);
+      const response = await fetch(`/api/searchFood?query=${encodeURIComponent(trimmedQuery)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const results = await response.json();
+      renderFoodCards(results.items, container);
     } catch (e) {
       console.error("FoodSearch API Error:", e);
       let icon = '⚠️', title = 'Something went wrong', desc = 'The server returned an unexpected error.';

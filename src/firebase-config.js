@@ -209,9 +209,50 @@ const CloudSync = (() => {
         }
     }
 
+    async function loadMeals(dayKey) {
+        const ref = getUserRef();
+        if (!ref) return null;
+        try {
+            const doc = await ref.collection('days').doc(dayKey).get();
+            if (doc.exists) {
+                return doc.data().meals;
+            }
+        } catch (e) {
+            console.error("Cloud meals load failed:", e);
+        }
+        return null;
+    }
+
+    async function saveWater(dayKey, water) {
+        const ref = getUserRef();
+        if (!ref) return;
+        try {
+            await ref.collection('days').doc(dayKey).set({ water: water }, { merge: true });
+        } catch (e) {
+            console.error("Cloud water save failed:", e);
+        }
+    }
+
+    async function loadWater(dayKey) {
+        const ref = getUserRef();
+        if (!ref) return null;
+        try {
+            const doc = await ref.collection('days').doc(dayKey).get();
+            if (doc.exists) {
+                return doc.data().water;
+            }
+        } catch (e) {
+            console.error("Cloud water load failed:", e);
+        }
+        return null;
+    }
+
     return {
         saveToCloud,
         loadFromCloud,
-        saveMeals
+        saveMeals,
+        loadMeals,
+        saveWater,
+        loadWater
     };
 })();

@@ -235,6 +235,10 @@ const Store = (() => {
   }
 
   function syncMealsForDay(dayKey, dayMeals) {
+    const data = load();
+    data.meals[dayKey] = dayMeals;
+    save(data);
+
     if (typeof CloudSync === 'undefined' || typeof auth === 'undefined' || !auth.currentUser) return;
     try {
       CloudSync.saveMeals(dayKey, dayMeals);
@@ -247,7 +251,6 @@ const Store = (() => {
     if (!data.meals[key]) data.meals[key] = { breakfast: [], lunch: [], dinner: [], snacks: [] };
     item.id = item.id || ('m' + Date.now());
     data.meals[key][mealType].push(item);
-    save(data);
     syncMealsForDay(key, data.meals[key]);
     return data;
   }
@@ -257,7 +260,6 @@ const Store = (() => {
     const key = getTodayKey();
     if (data.meals[key] && data.meals[key][mealType]) {
       data.meals[key][mealType] = data.meals[key][mealType].filter(m => m.id !== itemId);
-      save(data);
       syncMealsForDay(key, data.meals[key]);
     }
     return data;
@@ -293,11 +295,17 @@ const Store = (() => {
     return data.water[getTodayKey()] || 0;
   }
 
-  function setWater(glasses) {
+  function setWater(glasses, dateKey) {
     const data = load();
+    const key = dateKey || getTodayKey();
     if (!data.water) data.water = {};
-    data.water[getTodayKey()] = Math.max(0, glasses);
+    data.water[key] = Math.max(0, glasses);
     save(data);
+
+    if (typeof CloudSync !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser) {
+        CloudSync.saveWater(key, data.water[key]);
+    }
+
     return data;
   }
 
@@ -472,30 +480,7 @@ const Store = (() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }
 
-  // ---- API Keys ----
-  function getApiKey() {
-    return localStorage.getItem('calorieai_apikey') || '';
-  }
 
-  function setApiKey(key) {
-    if (key) {
-      localStorage.setItem('calorieai_apikey', key.trim());
-    } else {
-      localStorage.removeItem('calorieai_apikey');
-    }
-  }
-
-  function getGeminiApiKey() {
-    return localStorage.getItem('calorieai_gemini_apikey') || '';
-  }
-
-  function setGeminiApiKey(key) {
-    if (key) {
-      localStorage.setItem('calorieai_gemini_apikey', key.trim());
-    } else {
-      localStorage.removeItem('calorieai_gemini_apikey');
-    }
-  }
 
   // Cloud sync helpers
   function mergeCloudData(cloudData) {
@@ -555,10 +540,9 @@ const Store = (() => {
     hasOnboarded, completeOnboarding,
     exportCSV, searchFood, getFoodDatabase,
     getDarkMode, setDarkMode, initTheme,
-    getApiKey, setApiKey,
-    getGeminiApiKey, setGeminiApiKey,
     getBMI, getMealTypeByTime,
-    mergeCloudData, syncToCloud
+    mergeCloudData, syncToCloud,
+    getTodayKey
   };
 })();
 

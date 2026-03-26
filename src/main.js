@@ -118,12 +118,24 @@ const Router = (() => {
             
             if (user) {
                 try {
-                    const cloudData = await CloudSync.loadFromCloud();
+                    const dateKey = Store.getTodayKey();
+                    const [cloudData, meals, water] = await Promise.all([
+                        CloudSync.loadFromCloud(),
+                        CloudSync.loadMeals(dateKey),
+                        CloudSync.loadWater(dateKey)
+                    ]);
+
                     if (cloudData) {
                         Store.mergeCloudData(cloudData);
                     }
+                    if (meals) {
+                        Store.syncMealsForDay(dateKey, meals);
+                    }
+                    if (water) {
+                        Store.setWater(water, dateKey);
+                    }
                 } catch (e) {
-                    console.warn("Cloud sync failed, using local data");
+                    console.warn("Cloud sync failed, using local data:", e);
                 }
 
                 if (!currentHash || currentHash === '#/login' || currentHash === '#/') {
