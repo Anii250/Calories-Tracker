@@ -23,7 +23,7 @@ function FoodSearch(mealType) {
         </button>
       </div>
       <div class="food-search__tabs">
-        <button class="food-search__tab active" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 CalorieNinjas</button>
+        <button class="food-search__tab active" id="fs-tab-online" onclick="switchFoodTab('online')">🌐 Online Search</button>
         <button class="food-search__tab" id="fs-tab-local" onclick="switchFoodTab('local')">📦 Local</button>
       </div>
       <div class="food-search__results" id="food-search-results"></div>
@@ -69,7 +69,7 @@ async function handleFoodSearch(query) {
     container.innerHTML = `
       <div class="food-search__loading">
         <div class="food-search__spinner"></div>
-        <span>Searching CalorieNinjas...</span>
+        <span>Searching online...</span>
       </div>`;
 
     // Disable search button while loading
@@ -90,23 +90,6 @@ async function handleFoodSearch(query) {
     } catch (e) {
       console.error("FoodSearch API Error details:", e);
       let icon = '⚠️', title = 'Something went wrong', desc = e.message || 'The server returned an unexpected error.';
-
-      if (e.message === 'INVALID_KEY') {
-        icon = '🔑'; title = 'Invalid API Key';
-        desc = 'Your CalorieNinjas API key is invalid or expired. Update it in Settings.';
-      } else if (e.message === 'API_ERROR') {
-        icon = '❌'; title = 'API Server Error';
-        desc = 'CalorieNinjas rejected the request. You may have hit a rate limit or a temporary server error.';
-      } else if (e.message === 'NO_RESULTS') {
-        icon = '🔍'; title = 'No results found';
-        desc = `Try something like "2 eggs" or "1 cup rice" for better results.`;
-      } else if (e.message === 'TIMEOUT') {
-        icon = '⏳'; title = 'Request timed out';
-        desc = 'The server took too long. Check your connection and try again.';
-      } else if (e.message === 'NETWORK_ERROR') {
-        icon = '📡'; title = 'Error fetching data';
-        desc = 'Check your internet connection and try again.';
-      }
 
       container.innerHTML = `
         <div class="food-search__empty">
