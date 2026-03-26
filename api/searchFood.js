@@ -23,9 +23,19 @@ module.exports = async (req, res) => {
 
         if (!response.ok) {
             console.error(`Open Food Facts API error: ${response.status} - ${responseText}`);
+            let details = responseText;
+            // If the error is an HTML page, try to extract the title for a cleaner message
+            if (responseText.trim().startsWith('<!DOCTYPE html')) {
+                const titleMatch = responseText.match(/<title>(.*?)<\/title>/);
+                if (titleMatch && titleMatch[1]) {
+                    details = titleMatch[1];
+                } else {
+                    details = "The service returned an HTML error page.";
+                }
+            }
             return res.status(response.status).json({ 
                 error: `API error: ${response.status}`,
-                details: responseText
+                details: details
             });
         }
 
