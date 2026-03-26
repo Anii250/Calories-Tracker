@@ -127,28 +127,39 @@ async function handleFoodSearch(query) {
 
 /* ---- Render: Card format ---- */
 function renderFoodCards(results, container) {
+  const esc = (s) => (s || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+  const val = (v) => v || 0;
+
   container.innerHTML = `
     <div class="food-search__cards">
-      ${results.map((food, i) => `
+      ${results.map((food, i) => {
+        const name = food.name || 'Unknown Food';
+        const calories = val(food.calories);
+        const proteins = val(food.proteins);
+        const fats = val(food.fats);
+        const carbs = val(food.carbs);
+        const serving = food.serving || '';
+
+        return `
         <div class="food-result-card" id="food-result-${i}">
           <div class="food-result-card__top">
             <div class="food-result-card__info">
-              <div class="food-result-card__name">${escapeHtml(food.name)}</div>
-              <div class="food-result-card__qty">${escapeHtml(food.serving)}</div>
+              <div class="food-result-card__name">${escapeHtml(name)}</div>
+              <div class="food-result-card__qty">${escapeHtml(serving)}</div>
             </div>
-            <div class="food-result-card__cal">${food.calories}<small> kcal</small></div>
+            <div class="food-result-card__cal">${calories}<small> kcal</small></div>
           </div>
           <div class="food-result-card__macros">
             <div class="food-result-card__macro">
-              <span class="food-result-card__macro-val" style="color:#43a047">${food.proteins}g</span>
+              <span class="food-result-card__macro-val" style="color:#43a047">${proteins}g</span>
               <span class="food-result-card__macro-lbl">Protein</span>
             </div>
             <div class="food-result-card__macro">
-              <span class="food-result-card__macro-val" style="color:#ff9800">${food.carbs}g</span>
+              <span class="food-result-card__macro-val" style="color:#ff9800">${carbs}g</span>
               <span class="food-result-card__macro-lbl">Carbs</span>
             </div>
             <div class="food-result-card__macro">
-              <span class="food-result-card__macro-val" style="color:#e53935">${food.fats}g</span>
+              <span class="food-result-card__macro-val" style="color:#e53935">${fats}g</span>
               <span class="food-result-card__macro-lbl">Fat</span>
             </div>
             ${food.fiber ? `
@@ -158,15 +169,16 @@ function renderFoodCards(results, container) {
             </div>` : ''}
           </div>
           <div class="food-result-card__actions">
-            <button class="food-result-card__use-btn" onclick="useFoodResult('${food.name.replace(/'/g, "\\'")}', ${food.calories}, ${food.proteins}, ${food.fats}, ${food.carbs})">
+            <button class="food-result-card__use-btn" onclick="useFoodResult('${esc(name)}', ${calories}, ${proteins}, ${fats}, ${carbs})">
               ✅ Use This
             </button>
-            <button class="food-result-card__add-btn" onclick="quickAddFood('${food.name.replace(/'/g, "\\'")}', ${food.calories}, ${food.proteins}, ${food.fats}, ${food.carbs})">
+            <button class="food-result-card__add-btn" onclick="quickAddFood('${esc(name)}', ${calories}, ${proteins}, ${fats}, ${carbs})">
               ➕ Quick Add
             </button>
           </div>
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
 }

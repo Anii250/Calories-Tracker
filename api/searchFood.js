@@ -40,10 +40,29 @@ module.exports = async (req, res) => {
         }
 
         const data = JSON.parse(responseText);
+        
+        // Handle API Ninjas returning a message instead of food items
+        if (data && data.message && data.message.includes('premium')) {
+            return res.status(403).json({ 
+                error: "Premium Required", 
+                details: "This search query requires a premium API Ninjas subscription." 
+            });
+        }
+
         // API Ninjas returns an array directly, CalorieNinjas returns { items: [] }
-        // We normalize it here so the frontend works with either
         const items = Array.isArray(data) ? data : (data.items || []);
-        res.status(200).json({ items });
+        
+        // Filter out any entries that look like error messages
+        const validItems = items.filter(item => item && typeof item.calories !== 'undefined');
+        
+        if (items.length > 0 && validItems.length === 0) {
+             return res.status(403).json({ 
+                error: "Quota Exceeded or Premium Required", 
+                details: items[0].name || "The API returned a restricted response."
+            });
+        }
+
+        res.status(200).json({ items: validItems });
     } catch (error) {
         console.error("Serverless Function Error:", error);
         res.status(500).json({ error: 'Failed to fetch data from CalorieNinjas API: ' + error.message });
