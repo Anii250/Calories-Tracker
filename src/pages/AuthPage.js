@@ -48,6 +48,12 @@ function AuthPage() {
             ${authMode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
 
+          ${authMode === 'login' ? `
+            <div class="auth-forgot">
+              <a href="#" onclick="handleForgotPassword(event)">Forgot password?</a>
+            </div>
+          ` : ''}
+
           <div class="auth-divider">
             <span>or</span>
           </div>
@@ -119,6 +125,38 @@ async function handleAuthSubmit(e) {
     showAuthError(msg);
     btn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
     btn.disabled = false;
+  }
+}
+
+async function handleForgotPassword(e) {
+  if (e) e.preventDefault();
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const btn = document.getElementById('auth-submit-btn');
+
+  if (!email) {
+    showAuthError('Enter your email to reset your password.');
+    return;
+  }
+
+  if (btn) {
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+  }
+
+  try {
+    await Auth.resetPassword(email);
+    showAuthError('Password reset link sent. Check your inbox.');
+  } catch (err) {
+    let msg = err.message || 'Failed to send reset email.';
+    if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
+    else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email.';
+    else if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
+    showAuthError(msg);
+  } finally {
+    if (btn) {
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
   }
 }
 

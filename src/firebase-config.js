@@ -46,6 +46,10 @@ const Auth = (() => {
         return cred.user;
     }
 
+    async function resetPassword(email) {
+        await auth.sendPasswordResetEmail(email);
+    }
+
     async function loginGooglePopup() {
         try {
             const cred = await auth.signInWithPopup(googleProvider);
@@ -146,7 +150,7 @@ const Auth = (() => {
 
     return {
         getCurrentUser, isLoggedIn,
-        signUpEmail, loginEmail, loginGoogle,
+        signUpEmail, loginEmail, resetPassword, loginGoogle,
         loginGooglePopup, loginGoogleRedirect, handleRedirectResult,
         logout, onAuthChanged
     };

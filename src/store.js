@@ -556,7 +556,7 @@ const Store = (() => {
     save(data);
 
     if (typeof CloudSync !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser) {
-        CloudSync.saveWater(key, data.water[key]);
+      CloudSync.saveWater(key, data.water[key]);
     }
 
     return data;
@@ -773,11 +773,11 @@ const Store = (() => {
 
   function getMealTypeByTime() {
     const h = new Date().getHours();
-    if (h >= 5  && h < 11) return 'breakfast'; 
-    if (h >= 11 && h < 15) return 'lunch';     
-    if (h >= 15 && h < 18) return 'snacks';    
-    if (h >= 18 && h < 22) return 'dinner';    
-    return 'snacks';                            
+    if (h >= 5 && h < 11) return 'breakfast';
+    if (h >= 11 && h < 15) return 'lunch';
+    if (h >= 15 && h < 18) return 'snacks';
+    if (h >= 18 && h < 22) return 'dinner';
+    return 'snacks';
   }
 
   initTheme();
