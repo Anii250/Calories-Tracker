@@ -88,15 +88,27 @@ async function handleFoodSearch(query) {
       const results = await response.json();
       renderFoodCards(results.items, container);
     } catch (e) {
-      console.error("FoodSearch API Error details:", e);
-      let icon = '⚠️', title = 'Something went wrong', desc = e.message || 'The server returned an unexpected error.';
+      console.warn("Online food search failed:", e.message);
+      const localResults = Store.searchFood(trimmedQuery);
+      
+      const fallbackNote = `
+        <div style="font-size: 12px; color: var(--gray-500); padding: 8px 12px; background-color: var(--gray-100); border-radius: 6px; margin-bottom: 10px; text-align: center;">
+          ⚠️ Online search failed. Showing local results.
+        </div>
+      `;
 
-      container.innerHTML = `
-        <div class="food-search__empty">
-          <div style="font-size:1.8rem;margin-bottom:6px;">${icon}</div>
-          <div><strong>${title}</strong></div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
-        </div>`;
+      if (localResults.length > 0) {
+        renderFoodResults(localResults, container, '📦');
+        container.insertAdjacentHTML('afterbegin', fallbackNote);
+      } else {
+        let icon = '🔍', title = 'No results found', desc = `We couldn't find "${escapeHtml(trimmedQuery)}" online or in the local database.`;
+        container.innerHTML = `
+          <div class="food-search__empty">
+            <div style="font-size:1.8rem;margin-bottom:6px;">${icon}</div>
+            <div><strong>${title}</strong></div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">${desc}</div>
+          </div>`;
+      }
     } finally {
       // Re-enable search button and input
       if (searchBtn) { searchBtn.disabled = false; searchBtn.style.opacity = '1'; }
