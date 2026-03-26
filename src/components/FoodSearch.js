@@ -83,7 +83,7 @@ async function handleFoodSearch(query) {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API error response:", errorData);
-        throw new Error(`HTTP error! status: ${response.status}${errorData.error ? ' - ' + errorData.error : ''}`);
+        throw new Error(errorData.details || errorData.error || `HTTP error! status: ${response.status}`);
       }
       const results = await response.json();
       renderFoodCards(results.items, container);
