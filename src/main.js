@@ -33,6 +33,7 @@ const Router = (() => {
         login: AuthPage,
         diary: FoodDiaryPage,
         charts: ChartsPage,
+        scanner: ScannerPage,
         settings: SettingsPage,
         onboarding: OnboardingPage
     };
