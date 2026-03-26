@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "CalorieAI — Calories Tracker",
   "scripts": {
-    "build": "node generate-config.js"
+    "start": "echo \"Ready to serve locally.\""
   },
   "engines": {
     "node": ">=18"
