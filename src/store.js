@@ -541,7 +541,7 @@ const Store = (() => {
     exportCSV, searchFood, getFoodDatabase,
     getDarkMode, setDarkMode, initTheme,
     getBMI, getMealTypeByTime,
-    mergeCloudData, syncToCloud,
+    mergeCloudData, syncToCloud, syncMealsForDay,
     getTodayKey
   };
 })();

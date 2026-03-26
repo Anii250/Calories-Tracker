@@ -1,20 +1,22 @@
 module.exports = async (req, res) => {
     const { query } = req.query;
+    console.log("Searching for food:", query);
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required' });
     }
 
-    const apiKey = process.env.CALORIENINJAS_API_KEY;
-
+    const apiKey = (process.env.CALORIENINJAS_API_KEY || '').trim();
     if (!apiKey) {
+        console.error("API key not found or empty in env variables.");
         return res.status(500).json({ error: 'API key is not configured on the server. Please add CALORIENINJAS_API_KEY to environment variables.' });
     }
 
-    const url = `https://api.calorieninjas.com/v1/nutrition?query=${encodeURIComponent(query)}`;
+    const apiUrl = `https://api.calorieninjas.com/v1/nutrition?query=${encodeURIComponent(query)}`;
+    console.log("Fetching from URL:", apiUrl);
 
     try {
-        const response = await fetch(url, {
+        const response = await fetch(apiUrl, {
             headers: {
                 'X-Api-Key': apiKey,
             },
